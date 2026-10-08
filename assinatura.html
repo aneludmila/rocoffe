@@ -1,11 +1,743 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Assine a RoCoffe — Cafés de Rondônia</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet"><style>
-:root{--espresso:#29180f;--cafe:#67432d;--caramelo:#b47b48;--creme:#f5ede2;--papel:#fffaf3;--verde:#26351d;--linha:rgba(41,24,15,.17);--muted:#776458}*{box-sizing:border-box}body{margin:0;background:var(--creme);color:var(--espresso);font:15px/1.55 Montserrat,sans-serif}a{color:inherit;text-decoration:none}.wrap{width:min(1120px,calc(100% - 36px));margin:auto}.top{background:var(--espresso);color:white;text-align:center;padding:9px;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase}.nav{height:78px;display:flex;align-items:center;justify-content:space-between}.brand{font:600 2rem "Playfair Display",serif}.nav-actions{display:flex;gap:18px;align-items:center;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700}.progress{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:35px auto 50px}.progress span{height:5px;background:#d8c9bb;position:relative}.progress span.done,.progress span.active{background:var(--caramelo)}.progress span:after{content:attr(data-label);position:absolute;top:14px;left:0;font-size:.58rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(310px,.8fr);gap:28px;align-items:start;padding-bottom:80px}.panel{background:var(--papel);border:1px solid var(--linha);padding:36px}.step{display:none}.step.active{display:block}.eyebrow{font-size:.68rem;letter-spacing:.17em;text-transform:uppercase;color:var(--caramelo);font-weight:700}h1,h2{font-family:"Playfair Display",serif}h1{font-size:clamp(2.5rem,5vw,4.2rem);line-height:1;margin:10px 0 28px}h2{font-size:2rem;margin:0 0 20px}.plans{display:grid;grid-template-columns:1fr 1fr;gap:14px}.choice input{position:absolute;opacity:0}.choice label{display:block;height:100%;border:1px solid var(--linha);padding:22px;cursor:pointer}.choice input:checked+label{border:2px solid var(--cafe);background:#f0e2d3}.choice strong{font:600 1.25rem "Playfair Display";display:block}.choice small{display:block;color:var(--muted);margin-top:7px}.choice b{display:block;color:var(--cafe);margin-top:16px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field.full{grid-column:1/-1}.field label{display:block;font-size:.67rem;text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:6px}.field input,.field select{width:100%;height:50px;border:1px solid var(--linha);background:white;padding:0 14px;font:inherit}.login-card{background:#f1e3d4;border-left:5px solid var(--caramelo);padding:24px}.login-card p{color:var(--muted)}.btn{display:inline-flex;min-height:52px;border:0;background:var(--espresso);color:white;padding:0 24px;align-items:center;justify-content:center;font-weight:700;text-transform:uppercase;letter-spacing:.11em;font-size:.7rem;cursor:pointer}.btn.secondary{background:transparent;color:var(--espresso);border:1px solid var(--espresso)}.btn:disabled{opacity:.35;cursor:not-allowed}.actions{display:flex;justify-content:space-between;gap:12px;margin-top:30px}.summary{position:sticky;top:20px;background:var(--cafe);color:white;padding:30px}.summary-photo{height:190px;background:url('rocoffe-hero-v2.webp') 75% center/cover;margin:-30px -30px 25px}.summary h2{font-size:1.8rem}.row{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.18);font-size:.82rem}.row span{opacity:.7}.total{padding:22px 0}.total small{display:block;opacity:.65;text-transform:uppercase;letter-spacing:.1em}.total strong{font:600 2rem "Playfair Display"}.note{font-size:.72rem;opacity:.68}.success{background:#edf2e9;border:1px solid #b7c9ad;padding:22px}.loader{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:rgba(245,237,226,.95);opacity:0;transition:.25s}.loader.visible{opacity:1}.brew{text-align:center}.cone{width:90px;height:50px;border:5px solid var(--verde);border-top-width:12px;clip-path:polygon(0 0,100% 0,75% 100%,25% 100%);margin:auto}.drip{width:4px;height:65px;background:var(--cafe);margin:auto;animation:pour 1.25s infinite;transform-origin:top}.cup{width:110px;height:58px;border:5px solid var(--verde);border-top:0;border-radius:0 0 55px 55px;margin:auto;overflow:hidden;position:relative}.cup:after{content:"";position:absolute;inset:auto 0 0;height:55%;background:var(--cafe);animation:fill 1.25s infinite}.brew p{font-weight:700;margin-top:20px}@keyframes pour{0%,100%{transform:scaleY(.25);opacity:.3}50%{transform:scaleY(1);opacity:1}}@keyframes fill{0%{height:15%}100%{height:62%}}@media(max-width:800px){.layout{grid-template-columns:1fr}.summary{position:static}.plans,.fields{grid-template-columns:1fr}.field.full{grid-column:auto}.progress span:after{display:none}}@media(max-width:480px){.wrap{width:calc(100% - 24px)}.panel,.summary{padding:23px}.summary-photo{margin:-23px -23px 22px}.nav-actions a:first-child{display:none}.actions{flex-direction:column-reverse}.actions .btn{width:100%}}
-</style></head><body><div class="top">Monte sua experiência amazônica</div><nav class="nav wrap"><a class="brand" href="index.html">RoCoffe</a><div class="nav-actions"><a href="index.html#clube">Planos</a><a id="account-link" href="login.html?next=assinatura.html">Entrar</a></div></nav><div class="progress wrap"><span class="active" data-step="1" data-label="Experiência"></span><span data-step="2" data-label="Sua conta"></span><span data-step="3" data-label="Entrega"></span><span data-step="4" data-label="Resumo"></span></div><main class="layout wrap"><section class="panel">
-<div class="step active" data-step-panel="1"><div class="eyebrow">Etapa 1 de 4</div><h1>Qual experiência combina com você?</h1><div class="plans"><div class="choice"><input type="radio" name="plano" id="essencial" value="Essencial Amazônico" checked><label for="essencial"><strong>Essencial Amazônico</strong><small>Café robusta especial, perfil sensorial e história da origem.</small><b>R$ 149–179 / edição</b></label></div><div class="choice"><input type="radio" name="plano" id="experiencia" value="Experiência Amazônica"><label for="experiencia"><strong>Experiência Amazônica</strong><small>Caixa premium, colecionável e equipamento de preparo.</small><b>R$ 279–347 / edição</b></label></div></div><div class="fields" style="margin-top:22px"><div class="field"><label>Frequência</label><select id="frequencia"><option>Mensal</option><option>Bimestral</option><option>Edição avulsa</option></select></div><div class="field"><label>Como deseja receber</label><select id="moagem"><option>Em grãos</option><option>Moagem fina — espresso</option><option>Moagem média — coado</option><option>Moagem grossa — prensa</option></select></div></div><div class="actions"><span></span><button class="btn next" data-next="2">Continuar →</button></div></div>
-<div class="step" data-step-panel="2"><div class="eyebrow">Etapa 2 de 4</div><h1>Vamos criar um vínculo?</h1><div id="logged-box" class="success" hidden><strong>Conta conectada ✓</strong><p>Seus dados e sua assinatura ficarão salvos na área do cliente.</p></div><div id="guest-box" class="login-card"><h2>Entre para o Clube RoCoffe</h2><p>Crie sua conta para salvar endereços, acompanhar pedidos e cuidar da assinatura.</p><a class="btn" href="login.html?next=assinatura.html">Entrar ou criar conta</a></div><div class="actions"><button class="btn secondary back" data-back="1">Voltar</button><button class="btn next" data-next="3" id="to-address" disabled>Continuar →</button></div></div>
-<div class="step" data-step-panel="3" id="endereco"><div class="eyebrow">Etapa 3 de 4</div><h1>Onde quer receber?</h1><div class="fields"><div class="field"><label>CEP</label><input id="cep" inputmode="numeric" maxlength="9"></div><div class="field"><label>Apelido</label><input id="label" value="Casa"></div><div class="field full"><label>Endereço</label><input id="street"></div><div class="field"><label>Número</label><input id="number"></div><div class="field"><label>Complemento</label><input id="complement"></div><div class="field"><label>Bairro</label><input id="neighborhood"></div><div class="field"><label>Cidade</label><input id="city"></div><div class="field"><label>Estado</label><input id="state" maxlength="2"></div></div><div class="actions"><button class="btn secondary back" data-back="2">Voltar</button><button class="btn" id="save-address">Salvar e continuar →</button></div></div>
-<div class="step" data-step-panel="4"><div class="eyebrow">Etapa 4 de 4</div><h1>Sua descoberta está quase pronta.</h1><p>Revise os dados. A assinatura será salva em sua conta como aguardando pagamento.</p><div class="success"><strong>Próxima etapa: pagamento</strong><p>A cobrança ainda não acontece nesta versão. A integração com o gateway será adicionada sem expor dados bancários.</p></div><div class="actions"><button class="btn secondary back" data-back="3">Voltar</button><button class="btn" id="finish">Salvar assinatura</button></div></div>
-</section><aside class="summary"><div class="summary-photo"></div><h2>Resumo da experiência</h2><div class="row"><span>Plano</span><strong id="sum-plan">Essencial Amazônico</strong></div><div class="row"><span>Frequência</span><strong id="sum-frequency">Mensal</strong></div><div class="row"><span>Formato</span><strong id="sum-grind">Em grãos</strong></div><div class="row"><span>Entrega</span><strong id="sum-city">A definir</strong></div><div class="total"><small>Valor por edição</small><strong id="sum-price">R$ 149–179</strong></div><p class="note">O valor exato, o frete e o pagamento dependem da definição comercial dos planos.</p></aside></main><div id="brewing-loader" class="loader" hidden><div class="brew"><div class="cone"></div><div class="drip"></div><div class="cup"></div><p data-loading-message>Coando sua experiência...</p></div></div><script type="module">
-import{currentUser,supabase,showBrewing,hideBrewing}from'./supabase-client.js';let user=await currentUser();const $=s=>document.querySelector(s);if(user){$('#account-link').textContent='Minha conta';$('#account-link').href='minha-conta.html';$('#guest-box').hidden=true;$('#logged-box').hidden=false;$('#to-address').disabled=false}const requested=new URLSearchParams(location.search).get('plano');if(requested==='experiencia')$('#experiencia').checked=true;function update(){const p=$('[name="plano"]:checked').value;$('#sum-plan').textContent=p;$('#sum-price').textContent=p.startsWith('Experiência')?'R$ 279–347':'R$ 149–179';$('#sum-frequency').textContent=$('#frequencia').value;$('#sum-grind').textContent=$('#moagem').value}function step(n){document.querySelectorAll('.step').forEach(x=>x.classList.toggle('active',+x.dataset.stepPanel===n));document.querySelectorAll('.progress span').forEach(x=>{const s=+x.dataset.step;x.classList.toggle('active',s===n);x.classList.toggle('done',s<n)});scrollTo({top:0,behavior:'smooth'})}document.querySelectorAll('.next').forEach(b=>b.onclick=()=>step(+b.dataset.next));document.querySelectorAll('.back').forEach(b=>b.onclick=()=>step(+b.dataset.back));document.querySelectorAll('[name="plano"],select').forEach(x=>x.onchange=update);update();
-$('#cep').onblur=async()=>{const c=$('#cep').value.replace(/\D/g,'');if(c.length!==8)return;showBrewing('Buscando seu endereço...');try{const d=await fetch('https://viacep.com.br/ws/'+c+'/json/').then(r=>r.json());if(!d.erro){$('#street').value=d.logradouro;$('#neighborhood').value=d.bairro;$('#city').value=d.localidade;$('#state').value=d.uf;$('#sum-city').textContent=d.localidade+'/'+d.uf}}finally{hideBrewing()}};$('#save-address').onclick=async()=>{if(!user)return location.href='login.html?next=assinatura.html';if(['cep','street','number','neighborhood','city','state'].some(id=>!$('#'+id).value.trim()))return alert('Preencha os dados obrigatórios do endereço.');showBrewing('Salvando seu endereço...');const{error}=await supabase.from('addresses').insert({user_id:user.id,label:$('#label').value||'Casa',cep:$('#cep').value,street:$('#street').value,number:$('#number').value,complement:$('#complement').value,neighborhood:$('#neighborhood').value,city:$('#city').value,state:$('#state').value.toUpperCase(),is_default:true});hideBrewing();if(error)return alert('Não foi possível salvar o endereço.');step(4)};$('#finish').onclick=async()=>{showBrewing('Guardando sua próxima descoberta...');const{error}=await supabase.from('subscriptions').insert({user_id:user.id,plan:$('[name="plano"]:checked').value,frequency:$('#frequencia').value,grind:$('#moagem').value,status:'pending_payment'});hideBrewing();if(error)return alert('Não foi possível salvar a assinatura.');location.href='minha-conta.html'};
-</script></body></html>
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Assine a RoCoffe — Cafés de Rondônia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --espresso: #29180f;
+        --cafe: #67432d;
+        --caramelo: #b47b48;
+        --creme: #f5ede2;
+        --papel: #fffaf3;
+        --verde: #26351d;
+        --linha: rgba(41, 24, 15, 0.17);
+        --muted: #776458;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--creme);
+        color: var(--espresso);
+        font:
+          15px/1.55 Montserrat,
+          sans-serif;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .wrap {
+        width: min(1120px, calc(100% - 36px));
+        margin: auto;
+      }
+      .top {
+        background: var(--espresso);
+        color: white;
+        text-align: center;
+        padding: 9px;
+        font-size: 0.66rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+      .nav {
+        height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        font:
+          600 2rem "Playfair Display",
+          serif;
+      }
+      .nav-actions {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 700;
+      }
+      .progress {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 7px;
+        margin: 35px auto 50px;
+      }
+      .progress span {
+        height: 5px;
+        background: #d8c9bb;
+        position: relative;
+      }
+      .progress span.done,
+      .progress span.active {
+        background: var(--caramelo);
+      }
+      .progress span:after {
+        content: attr(data-label);
+        position: absolute;
+        top: 14px;
+        left: 0;
+        font-size: 0.58rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(310px, 0.8fr);
+        gap: 28px;
+        align-items: start;
+        padding-bottom: 80px;
+      }
+      .panel {
+        background: var(--papel);
+        border: 1px solid var(--linha);
+        padding: 36px;
+      }
+      .step {
+        display: none;
+      }
+      .step.active {
+        display: block;
+      }
+      .eyebrow {
+        font-size: 0.68rem;
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+        color: var(--caramelo);
+        font-weight: 700;
+      }
+      h1,
+      h2 {
+        font-family: "Playfair Display", serif;
+      }
+      h1 {
+        font-size: clamp(2.5rem, 5vw, 4.2rem);
+        line-height: 1;
+        margin: 10px 0 28px;
+      }
+      h2 {
+        font-size: 2rem;
+        margin: 0 0 20px;
+      }
+      .plans {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .choice input {
+        position: absolute;
+        opacity: 0;
+      }
+      .choice label {
+        display: block;
+        height: 100%;
+        border: 1px solid var(--linha);
+        padding: 22px;
+        cursor: pointer;
+      }
+      .choice input:checked + label {
+        border: 2px solid var(--cafe);
+        background: #f0e2d3;
+      }
+      .choice strong {
+        font: 600 1.25rem "Playfair Display";
+        display: block;
+      }
+      .choice small {
+        display: block;
+        color: var(--muted);
+        margin-top: 7px;
+      }
+      .choice b {
+        display: block;
+        color: var(--cafe);
+        margin-top: 16px;
+      }
+      .fields {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .field.full {
+        grid-column: 1/-1;
+      }
+      .field label {
+        display: block;
+        font-size: 0.67rem;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .field input,
+      .field select {
+        width: 100%;
+        height: 50px;
+        border: 1px solid var(--linha);
+        background: white;
+        padding: 0 14px;
+        font: inherit;
+      }
+      .login-card {
+        background: #f1e3d4;
+        border-left: 5px solid var(--caramelo);
+        padding: 24px;
+      }
+      .login-card p {
+        color: var(--muted);
+      }
+      .btn {
+        display: inline-flex;
+        min-height: 52px;
+        border: 0;
+        background: var(--espresso);
+        color: white;
+        padding: 0 24px;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.11em;
+        font-size: 0.7rem;
+        cursor: pointer;
+      }
+      .btn.secondary {
+        background: transparent;
+        color: var(--espresso);
+        border: 1px solid var(--espresso);
+      }
+      .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 30px;
+      }
+      .summary {
+        position: sticky;
+        top: 20px;
+        background: var(--cafe);
+        color: white;
+        padding: 30px;
+      }
+      .summary-photo {
+        height: 190px;
+        background: url("assets/rocoffe-hero-v2.webp") 75% center/cover;
+        margin: -30px -30px 25px;
+      }
+      .summary h2 {
+        font-size: 1.8rem;
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 13px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        font-size: 0.82rem;
+      }
+      .row span {
+        opacity: 0.7;
+      }
+      .total {
+        padding: 22px 0;
+      }
+      .total small {
+        display: block;
+        opacity: 0.65;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .total strong {
+        font: 600 2rem "Playfair Display";
+      }
+      .note {
+        font-size: 0.72rem;
+        opacity: 0.68;
+      }
+      .success {
+        background: #edf2e9;
+        border: 1px solid #b7c9ad;
+        padding: 22px;
+      }
+      .loader {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+        display: grid;
+        place-items: center;
+        background: rgba(245, 237, 226, 0.95);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: 0.25s;
+      }
+      .loader[hidden] {
+        display: none;
+      }
+      .loader.visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+      .brew {
+        text-align: center;
+      }
+      .cone {
+        width: 90px;
+        height: 50px;
+        border: 5px solid var(--verde);
+        border-top-width: 12px;
+        clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
+        margin: auto;
+      }
+      .drip {
+        width: 4px;
+        height: 65px;
+        background: var(--cafe);
+        margin: auto;
+        animation: pour 1.25s infinite;
+        transform-origin: top;
+      }
+      .cup {
+        width: 110px;
+        height: 58px;
+        border: 5px solid var(--verde);
+        border-top: 0;
+        border-radius: 0 0 55px 55px;
+        margin: auto;
+        overflow: hidden;
+        position: relative;
+      }
+      .cup:after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 55%;
+        background: var(--cafe);
+        animation: fill 1.25s infinite;
+      }
+      .brew p {
+        font-weight: 700;
+        margin-top: 20px;
+      }
+      @keyframes pour {
+        0%,
+        100% {
+          transform: scaleY(0.25);
+          opacity: 0.3;
+        }
+        50% {
+          transform: scaleY(1);
+          opacity: 1;
+        }
+      }
+      @keyframes fill {
+        0% {
+          height: 15%;
+        }
+        100% {
+          height: 62%;
+        }
+      }
+      @media (max-width: 800px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .summary {
+          position: static;
+        }
+        .plans,
+        .fields {
+          grid-template-columns: 1fr;
+        }
+        .field.full {
+          grid-column: auto;
+        }
+        .progress span:after {
+          display: none;
+        }
+      }
+      @media (max-width: 480px) {
+        .wrap {
+          width: calc(100% - 24px);
+        }
+        .panel,
+        .summary {
+          padding: 23px;
+        }
+        .summary-photo {
+          margin: -23px -23px 22px;
+        }
+        .nav-actions a:first-child {
+          display: none;
+        }
+        .actions {
+          flex-direction: column-reverse;
+        }
+        .actions .btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">Monte sua experiência amazônica</div>
+    <nav class="nav wrap">
+      <a class="brand" href="index.html">RoCoffe</a>
+      <div class="nav-actions">
+        <a href="index.html#clube">Planos</a
+        ><a id="account-link" href="login.html?next=assinatura.html">Entrar</a>
+      </div>
+    </nav>
+    <div class="progress wrap">
+      <span class="active" data-step="1" data-label="Experiência"></span
+      ><span data-step="2" data-label="Sua conta"></span
+      ><span data-step="3" data-label="Entrega"></span
+      ><span data-step="4" data-label="Resumo"></span>
+    </div>
+    <main class="layout wrap">
+      <section class="panel">
+        <div class="step active" data-step-panel="1">
+          <div class="eyebrow">Etapa 1 de 4</div>
+          <h1>Qual experiência combina com você?</h1>
+          <div class="plans">
+            <div class="choice">
+              <input
+                type="radio"
+                name="plano"
+                id="essencial"
+                value="Essencial Amazônico"
+                checked
+              /><label for="essencial"
+                ><strong>Essencial Amazônico</strong
+                ><small
+                  >Café robusta especial, perfil sensorial e história da
+                  origem.</small
+                ><b>R$ 149–179 / edição</b></label
+              >
+            </div>
+            <div class="choice">
+              <input
+                type="radio"
+                name="plano"
+                id="experiencia"
+                value="Experiência Amazônica"
+              /><label for="experiencia"
+                ><strong>Experiência Amazônica</strong
+                ><small
+                  >Caixa premium, colecionável e equipamento de preparo.</small
+                ><b>R$ 279–347 / edição</b></label
+              >
+            </div>
+          </div>
+          <div class="fields" style="margin-top: 22px">
+            <div class="field">
+              <label>Frequência</label
+              ><select id="frequencia">
+                <option>Mensal</option>
+                <option>Bimestral</option>
+                <option>Edição avulsa</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Como deseja receber</label
+              ><select id="moagem">
+                <option>Em grãos</option>
+                <option>Moagem fina — espresso</option>
+                <option>Moagem média — coado</option>
+                <option>Moagem grossa — prensa</option>
+              </select>
+            </div>
+          </div>
+          <div class="actions">
+            <span></span
+            ><button class="btn next" data-next="2">Continuar →</button>
+          </div>
+        </div>
+        <div class="step" data-step-panel="2">
+          <div class="eyebrow">Etapa 2 de 4</div>
+          <h1>Vamos criar um vínculo?</h1>
+          <div id="logged-box" class="success" hidden>
+            <strong>Conta conectada ✓</strong>
+            <p>
+              Seus dados e sua assinatura ficarão salvos na área do cliente.
+            </p>
+          </div>
+          <div id="guest-box" class="login-card">
+            <h2>Entre para o Clube RoCoffe</h2>
+            <p>
+              Crie sua conta para salvar endereços, acompanhar pedidos e cuidar
+              da assinatura.
+            </p>
+            <a class="btn" href="login.html?next=assinatura.html"
+              >Entrar ou criar conta</a
+            >
+          </div>
+          <div class="actions">
+            <button class="btn secondary back" data-back="1">Voltar</button
+            ><button class="btn next" data-next="3" id="to-address" disabled>
+              Continuar →
+            </button>
+          </div>
+        </div>
+        <div class="step" data-step-panel="3" id="endereco">
+          <div class="eyebrow">Etapa 3 de 4</div>
+          <h1>Onde quer receber?</h1>
+          <div class="fields">
+            <div class="field">
+              <label>CEP</label
+              ><input id="cep" inputmode="numeric" maxlength="9" />
+            </div>
+            <div class="field">
+              <label>Apelido</label><input id="label" value="Casa" />
+            </div>
+            <div class="field full">
+              <label>Endereço</label><input id="street" />
+            </div>
+            <div class="field"><label>Número</label><input id="number" /></div>
+            <div class="field">
+              <label>Complemento</label><input id="complement" />
+            </div>
+            <div class="field">
+              <label>Bairro</label><input id="neighborhood" />
+            </div>
+            <div class="field"><label>Cidade</label><input id="city" /></div>
+            <div class="field">
+              <label>Estado</label><input id="state" maxlength="2" />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn secondary back" data-back="2">Voltar</button
+            ><button class="btn" id="save-address">Salvar e continuar →</button>
+          </div>
+        </div>
+        <div class="step" data-step-panel="4">
+          <div class="eyebrow">Etapa 4 de 4</div>
+          <h1>Sua descoberta está quase pronta.</h1>
+          <p>
+            Revise os dados. A assinatura será salva em sua conta como
+            aguardando pagamento.
+          </p>
+          <div class="success">
+            <strong>Próxima etapa: pagamento</strong>
+            <p>
+              A cobrança ainda não acontece nesta versão. A integração com o
+              gateway será adicionada sem expor dados bancários.
+            </p>
+          </div>
+          <div class="actions">
+            <button class="btn secondary back" data-back="3">Voltar</button
+            ><button class="btn" id="finish">Salvar assinatura</button>
+          </div>
+        </div>
+      </section>
+      <aside class="summary">
+        <div class="summary-photo"></div>
+        <h2>Resumo da experiência</h2>
+        <div class="row">
+          <span>Plano</span><strong id="sum-plan">Essencial Amazônico</strong>
+        </div>
+        <div class="row">
+          <span>Frequência</span><strong id="sum-frequency">Mensal</strong>
+        </div>
+        <div class="row">
+          <span>Formato</span><strong id="sum-grind">Em grãos</strong>
+        </div>
+        <div class="row">
+          <span>Entrega</span><strong id="sum-city">A definir</strong>
+        </div>
+        <div class="total">
+          <small>Valor por edição</small
+          ><strong id="sum-price">R$ 149–179</strong>
+        </div>
+        <p class="note">
+          O valor exato, o frete e o pagamento dependem da definição comercial
+          dos planos.
+        </p>
+      </aside>
+    </main>
+    <div id="brewing-loader" class="loader" hidden>
+      <div class="brew">
+        <div class="cone"></div>
+        <div class="drip"></div>
+        <div class="cup"></div>
+        <p data-loading-message>Coando sua experiência...</p>
+      </div>
+    </div>
+    <script type="module">
+      import {
+        currentUser,
+        supabase,
+        showBrewing,
+        hideBrewing,
+      } from "./supabase-client.js";
+      let user = await currentUser();
+      const $ = (s) => document.querySelector(s);
+      const params = new URLSearchParams(location.search);
+      const requested = params.get("plano");
+      if (requested === "experiencia") $("#experiencia").checked = true;
+      const saved = JSON.parse(
+        sessionStorage.getItem("rocoffe-checkout") || "null",
+      );
+      if (saved) {
+        const savedPlan = document.querySelector(
+          `[name="plano"][value="${saved.plan}"]`,
+        );
+        if (savedPlan) savedPlan.checked = true;
+        if (saved.frequency) $("#frequencia").value = saved.frequency;
+        if (saved.grind) $("#moagem").value = saved.grind;
+      }
+      function checkoutState() {
+        return {
+          plan: $('[name="plano"]:checked').value,
+          frequency: $("#frequencia").value,
+          grind: $("#moagem").value,
+        };
+      }
+      function saveCheckout() {
+        sessionStorage.setItem(
+          "rocoffe-checkout",
+          JSON.stringify(checkoutState()),
+        );
+      }
+      function loginUrl() {
+        const plan = $("#experiencia").checked ? "experiencia" : "essencial";
+        const returnTo = `assinatura.html?plano=${plan}&retomar=1`;
+        return `login.html?next=${encodeURIComponent(returnTo)}`;
+      }
+      if (user) {
+        $("#account-link").textContent = "Minha conta";
+        $("#account-link").href = "minha-conta.html";
+        $("#guest-box").hidden = true;
+        $("#logged-box").hidden = false;
+        $("#to-address").disabled = false;
+      } else {
+        $("#account-link").href = loginUrl();
+        $("#guest-box a").href = loginUrl();
+      }
+      function update() {
+        const p = $('[name="plano"]:checked').value;
+        $("#sum-plan").textContent = p;
+        $("#sum-price").textContent = p.startsWith("Experiência")
+          ? "R$ 279–347"
+          : "R$ 149–179";
+        $("#sum-frequency").textContent = $("#frequencia").value;
+        $("#sum-grind").textContent = $("#moagem").value;
+        saveCheckout();
+        if (!user) {
+          $("#account-link").href = loginUrl();
+          $("#guest-box a").href = loginUrl();
+        }
+      }
+      function step(n) {
+        document
+          .querySelectorAll(".step")
+          .forEach((x) =>
+            x.classList.toggle("active", +x.dataset.stepPanel === n),
+          );
+        document.querySelectorAll(".progress span").forEach((x) => {
+          const s = +x.dataset.step;
+          x.classList.toggle("active", s === n);
+          x.classList.toggle("done", s < n);
+        });
+        scrollTo({ top: 0, behavior: "smooth" });
+      }
+      document.querySelectorAll(".next").forEach(
+        (b) =>
+          (b.onclick = () => {
+            saveCheckout();
+            step(+b.dataset.next);
+          }),
+      );
+      document
+        .querySelectorAll(".back")
+        .forEach((b) => (b.onclick = () => step(+b.dataset.back)));
+      document
+        .querySelectorAll('[name="plano"],select')
+        .forEach((x) => (x.onchange = update));
+      update();
+      if (
+        user &&
+        (params.get("retomar") === "1" || location.hash === "#endereco")
+      )
+        step(3);
+      $("#cep").onblur = async () => {
+        const c = $("#cep").value.replace(/\D/g, "");
+        if (c.length !== 8) return;
+        showBrewing("Buscando seu endereço...");
+        try {
+          const d = await fetch(
+            "https://viacep.com.br/ws/" + c + "/json/",
+          ).then((r) => r.json());
+          if (!d.erro) {
+            $("#street").value = d.logradouro;
+            $("#neighborhood").value = d.bairro;
+            $("#city").value = d.localidade;
+            $("#state").value = d.uf;
+            $("#sum-city").textContent = d.localidade + "/" + d.uf;
+          }
+        } finally {
+          hideBrewing();
+        }
+      };
+      $("#save-address").onclick = async () => {
+        if (!user) {
+          saveCheckout();
+          return (location.href = loginUrl());
+        }
+        if (
+          ["cep", "street", "number", "neighborhood", "city", "state"].some(
+            (id) => !$("#" + id).value.trim(),
+          )
+        )
+          return alert("Preencha os dados obrigatórios do endereço.");
+        showBrewing("Salvando seu endereço...");
+        const { error } = await supabase.from("addresses").insert({
+          user_id: user.id,
+          label: $("#label").value || "Casa",
+          cep: $("#cep").value,
+          street: $("#street").value,
+          number: $("#number").value,
+          complement: $("#complement").value,
+          neighborhood: $("#neighborhood").value,
+          city: $("#city").value,
+          state: $("#state").value.toUpperCase(),
+          is_default: true,
+        });
+        hideBrewing();
+        if (error) return alert("Não foi possível salvar o endereço.");
+        step(4);
+      };
+      $("#finish").onclick = async () => {
+        showBrewing("Guardando sua próxima descoberta...");
+        const { error } = await supabase.from("subscriptions").insert({
+          user_id: user.id,
+          plan: $('[name="plano"]:checked').value,
+          frequency: $("#frequencia").value,
+          grind: $("#moagem").value,
+          status: "pending_payment",
+        });
+        hideBrewing();
+        if (error) return alert("Não foi possível salvar a assinatura.");
+        location.href = "minha-conta.html";
+      };
+    </script>
+  </body>
+</html>
