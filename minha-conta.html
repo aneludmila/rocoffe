@@ -121,6 +121,8 @@
         font-size: 0.68rem;
         font-weight: 700;
         margin-top: 18px;
+        border: 0;
+        cursor: pointer;
       }
       .loader {
         position: fixed;
@@ -199,7 +201,12 @@
       </div>
     </div>
     <script type="module">
-      import { currentUser, supabase } from "./supabase-client.js";
+      import {
+        currentUser,
+        supabase,
+        showBrewing,
+        hideBrewing,
+      } from "./supabase-client.js";
       const u = await currentUser();
       if (!u) location.href = "login.html?next=minha-conta.html";
       else {
@@ -226,7 +233,7 @@
           document.querySelector("#subscriptions").innerHTML = s
             .map(
               (x) =>
-                `<div class="item"><strong>${x.plan}</strong><small>${x.frequency} • ${x.grind} • ${x.status}</small></div>`,
+                `<div class="item"><strong>${x.plan}</strong><small>${x.frequency} • ${x.grind} • ${x.status === "active" ? "Pagamento aprovado" : x.status === "payment_failed" ? "Pagamento não aprovado" : "Aguardando pagamento"}</small>${x.status !== "active" ? `<button class="btn pay-pending" data-id="${x.id}">Pagar agora</button>` : ""}</div>`,
             )
             .join("");
         if (a?.length)
@@ -237,6 +244,22 @@
             )
             .join("");
         document.querySelector("#account-loader").remove();
+        document.querySelectorAll(".pay-pending").forEach((button) => {
+          button.onclick = async () => {
+            button.disabled = true;
+            const { data, error } = await supabase.functions.invoke(
+              "create-mercado-pago-preference",
+              { body: { subscription_id: button.dataset.id } },
+            );
+            if (error || !data?.checkout_url) {
+              button.disabled = false;
+              return alert(
+                data?.error || "O Mercado Pago ainda está em configuração.",
+              );
+            }
+            location.href = data.checkout_url;
+          };
+        });
       }
       document.querySelector("#logout").onclick = async () => {
         await supabase.auth.signOut();

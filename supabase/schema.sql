@@ -30,8 +30,12 @@ create table public.subscriptions (
   plan text not null check (plan in ('Essencial Amazônico','Experiência Amazônica')),
   frequency text not null check (frequency in ('Mensal','Bimestral','Edição avulsa')),
   grind text not null,
-  status text not null default 'draft' check (status in ('draft','pending_payment','active','paused','cancelled')),
+  status text not null default 'draft' check (status in ('draft','pending_payment','payment_failed','active','paused','cancelled')),
   price_cents integer,
+  payment_provider text,
+  preference_id text,
+  payment_id text,
+  paid_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pagamento — RoCoffe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --espresso: #29180f;
+        --cafe: #67432d;
+        --creme: #f5ede2;
+        --papel: #fffaf3;
+        --verde: #26351d;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: var(--creme);
+        color: var(--espresso);
+        font:
+          15px/1.55 Montserrat,
+          sans-serif;
+        padding: 24px;
+      }
+      .card {
+        width: min(620px, 100%);
+        background: var(--papel);
+        padding: 54px;
+        border-top: 8px solid var(--cafe);
+        text-align: center;
+      }
+      .brand {
+        font:
+          600 2rem "Playfair Display",
+          serif;
+      }
+      h1 {
+        font:
+          600 clamp(2.5rem, 7vw, 4.4rem) / 1 "Playfair Display",
+          serif;
+        margin: 28px 0 16px;
+      }
+      .status {
+        color: #766456;
+      }
+      .btn {
+        display: inline-flex;
+        margin-top: 22px;
+        padding: 15px 22px;
+        background: var(--verde);
+        color: white;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+      @media (max-width: 560px) {
+        .card {
+          padding: 36px 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="brand">RoCoffe</div>
+      <h1 id="title">Confirmando seu pagamento...</h1>
+      <p class="status" id="message">
+        Só um instante enquanto conferimos o retorno do Mercado Pago.
+      </p>
+      <a class="btn" href="minha-conta.html">Ir para minha conta</a>
+    </main>
+    <script type="module">
+      import { currentUser, supabase } from "./supabase-client.js";
+      const user = await currentUser();
+      const next = encodeURIComponent(location.pathname + location.search);
+      if (!user) location.href = `login.html?next=${next}`;
+      else {
+        const params = new URLSearchParams(location.search);
+        const paymentId =
+          params.get("payment_id") || params.get("collection_id");
+        const result = params.get("resultado");
+        const title = document.querySelector("#title");
+        const message = document.querySelector("#message");
+        if (paymentId) {
+          const { data, error } = await supabase.functions.invoke(
+            "verify-mercado-pago-payment",
+            { body: { payment_id: paymentId } },
+          );
+          if (!error && data?.status === "active") {
+            title.textContent = "Pagamento aprovado!";
+            message.textContent =
+              "Sua primeira experiência RoCoffe está confirmada.";
+          } else if (!error && data?.status === "pending_payment") {
+            title.textContent = "Pagamento em análise.";
+            message.textContent =
+              "Assim que o Mercado Pago confirmar, sua assinatura será liberada.";
+          } else {
+            title.textContent = "Não conseguimos confirmar.";
+            message.textContent =
+              "Você pode tentar novamente pela sua área do cliente.";
+          }
+        } else if (result === "falha") {
+          title.textContent = "Pagamento não concluído.";
+          message.textContent =
+            "Nenhuma cobrança foi confirmada. Tente novamente na sua conta.";
+        } else {
+          title.textContent = "Pagamento pendente.";
+          message.textContent =
+            "Acompanhe a confirmação na sua área do cliente.";
+        }
+      }
+    </script>
+  </body>
+</html>
