@@ -430,7 +430,7 @@
                 ><small
                   >Café robusta especial, perfil sensorial e história da
                   origem.</small
-                ><b>R$ 149–179 / edição</b></label
+                ><b>R$ 149 / edição</b></label
               >
             </div>
             <div class="choice">
@@ -443,7 +443,7 @@
                 ><strong>Experiência Amazônica</strong
                 ><small
                   >Caixa premium, colecionável e equipamento de preparo.</small
-                ><b>R$ 279–347 / edição</b></label
+                ><b>R$ 279 / edição</b></label
               >
             </div>
           </div>
@@ -531,20 +531,17 @@
         <div class="step" data-step-panel="4">
           <div class="eyebrow">Etapa 4 de 4</div>
           <h1>Sua descoberta está quase pronta.</h1>
-          <p>
-            Revise os dados. A assinatura será salva em sua conta como
-            aguardando pagamento.
-          </p>
+          <p>Revise os dados e siga para o ambiente seguro do Mercado Pago.</p>
           <div class="success">
-            <strong>Próxima etapa: pagamento</strong>
+            <strong>Pagamento protegido pelo Mercado Pago</strong>
             <p>
-              A cobrança ainda não acontece nesta versão. A integração com o
-              gateway será adicionada sem expor dados bancários.
+              Escolha Pix ou cartão no checkout. A RoCoffe não recebe nem
+              armazena os dados do seu cartão.
             </p>
           </div>
           <div class="actions">
             <button class="btn secondary back" data-back="3">Voltar</button
-            ><button class="btn" id="finish">Salvar assinatura</button>
+            ><button class="btn" id="finish">Ir para o pagamento</button>
           </div>
         </div>
       </section>
@@ -564,12 +561,10 @@
           <span>Entrega</span><strong id="sum-city">A definir</strong>
         </div>
         <div class="total">
-          <small>Valor por edição</small
-          ><strong id="sum-price">R$ 149–179</strong>
+          <small>Valor por edição</small><strong id="sum-price">R$ 149</strong>
         </div>
         <p class="note">
-          O valor exato, o frete e o pagamento dependem da definição comercial
-          dos planos.
+          Primeira edição. O pagamento será concluído no Mercado Pago.
         </p>
       </aside>
     </main>
@@ -636,8 +631,8 @@
         const p = $('[name="plano"]:checked').value;
         $("#sum-plan").textContent = p;
         $("#sum-price").textContent = p.startsWith("Experiência")
-          ? "R$ 279–347"
-          : "R$ 149–179";
+          ? "R$ 279"
+          : "R$ 149";
         $("#sum-frequency").textContent = $("#frequencia").value;
         $("#sum-grind").textContent = $("#moagem").value;
         saveCheckout();
@@ -726,17 +721,41 @@
         step(4);
       };
       $("#finish").onclick = async () => {
-        showBrewing("Guardando sua próxima descoberta...");
-        const { error } = await supabase.from("subscriptions").insert({
-          user_id: user.id,
-          plan: $('[name="plano"]:checked').value,
-          frequency: $("#frequencia").value,
-          grind: $("#moagem").value,
-          status: "pending_payment",
-        });
+        const button = $("#finish");
+        button.disabled = true;
+        showBrewing("Abrindo seu pagamento seguro...");
+        const plan = $('[name="plano"]:checked').value;
+        const { data: subscription, error } = await supabase
+          .from("subscriptions")
+          .insert({
+            user_id: user.id,
+            plan,
+            frequency: $("#frequencia").value,
+            grind: $("#moagem").value,
+            price_cents: plan.startsWith("Experiência") ? 27900 : 14900,
+            status: "pending_payment",
+          })
+          .select("id")
+          .single();
+        if (error) {
+          hideBrewing();
+          button.disabled = false;
+          return alert("Não foi possível preparar sua assinatura.");
+        }
+        const { data, error: paymentError } = await supabase.functions.invoke(
+          "create-mercado-pago-preference",
+          { body: { subscription_id: subscription.id } },
+        );
         hideBrewing();
-        if (error) return alert("Não foi possível salvar a assinatura.");
-        location.href = "minha-conta.html";
+        if (paymentError || !data?.checkout_url) {
+          button.disabled = false;
+          alert(
+            data?.error ||
+              "O Mercado Pago ainda está em configuração. Sua assinatura ficou salva na sua conta.",
+          );
+          return (location.href = "minha-conta.html");
+        }
+        location.href = data.checkout_url;
       };
     </script>
   </body>
