@@ -4,8 +4,8 @@ const SUPABASE_PUBLISHABLE_KEY =
   "sb_publishable_2ywtmqyUdokEJREYvvhfyg_50VrN84b";
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 export async function currentUser() {
-  const { data } = await supabase.auth.getUser();
-  return data.user ?? null;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user ?? null;
 }
 export async function saveProfile(userId, fullName, whatsapp) {
   return supabase.from("profiles").upsert({
