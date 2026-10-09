@@ -11,7 +11,15 @@ h2, h3 { line-height: 1.12; }
 .logo, .brand, .brand b, .brand-logo {
   font-family: var(--font-heading); font-weight: 600; letter-spacing: -.025em;
 }
-.logo:after, .brand-logo:after { left: auto; right: -.55em; top: .2em; width: .3em; height: .55em; }
+.logo:after, .brand-logo:after { content: none; }
+.wordmark-initial { position: relative; display: inline-block; line-height: 1; }
+.wordmark-initial:after {
+  content: ""; position: absolute; left: 58%; top: -.24em;
+  width: .3em; height: .5em; border-radius: 100% 0 100% 0;
+  background: var(--folha, var(--verde, #253015)); transform: rotate(26deg);
+  pointer-events: none;
+}
+.footer .wordmark-initial:after, .box .wordmark-initial:after { background: #d6c2a5; }
 .links, .nav-actions, .btn, .cta, .tabs button, .nav button,
 .kicker, .eyebrow, .tag, .text-link, .back, .topbar, .top,
 .field label, .promise b, .notes, .progress span:after {
@@ -38,7 +46,7 @@ p { text-wrap: pretty; }
 /* Keep wider serif headings and wordmark comfortable on small screens. */
 .hero-copy { max-width: 560px; }
 .hero-copy h1 { font-size: clamp(3.2rem, 6.4vw, 6rem); }
-.logo { margin-right: .6em; }
+.logo { margin-right: 0; }
 @media (max-width: 520px) {
   .logo { font-size: 1.7rem; }
   .hero-copy h1 { font-size: clamp(2.6rem, 12vw, 3.7rem); }
