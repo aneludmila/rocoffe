@@ -587,7 +587,6 @@
       const $ = (s) => document.querySelector(s);
       const params = new URLSearchParams(location.search);
       const requested = params.get("plano");
-      if (requested === "experiencia") $("#experiencia").checked = true;
       const saved = JSON.parse(
         sessionStorage.getItem("rocoffe-checkout") || "null",
       );
@@ -599,6 +598,8 @@
         if (saved.frequency) $("#frequencia").value = saved.frequency;
         if (saved.grind) $("#moagem").value = saved.grind;
       }
+      if (requested === "essencial") $("#essencial").checked = true;
+      if (requested === "experiencia") $("#experiencia").checked = true;
       function checkoutState() {
         return {
           plan: $('[name="plano"]:checked').value,
