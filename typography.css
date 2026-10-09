@@ -1,6 +1,6 @@
 /* Shared RoCoffee type system */
 :root {
-  --font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-heading: "Lora", Georgia, serif;
   --font-accent: "Montserrat", Arial, sans-serif;
   --font-body: "Source Sans 3", "Segoe UI", sans-serif;
 }
@@ -9,9 +9,9 @@ h1, h2, h3, .serif, blockquote { font-family: var(--font-heading); font-weight: 
 h1 { line-height: 1.04; }
 h2, h3 { line-height: 1.12; }
 .logo, .brand, .brand b, .brand-logo {
-  font-family: var(--font-heading); font-weight: 600; letter-spacing: -.035em;
+  font-family: var(--font-heading); font-weight: 600; letter-spacing: -.025em;
 }
-.logo:after, .brand-logo:after { left: 1.55em; top: -.2em; }
+.logo:after, .brand-logo:after { left: auto; right: -.55em; top: .2em; width: .3em; height: .55em; }
 .links, .nav-actions, .btn, .cta, .tabs button, .nav button,
 .kicker, .eyebrow, .tag, .text-link, .back, .topbar, .top,
 .field label, .promise b, .notes, .progress span:after {
@@ -33,4 +33,14 @@ p { text-wrap: pretty; }
   .logo { font-size: 1.9rem; }
   .topbar { letter-spacing: .1em; }
   .links.right .btn { font-size: .65rem; letter-spacing: .05em; }
+}
+
+/* Keep wider serif headings and wordmark comfortable on small screens. */
+.hero-copy { max-width: 560px; }
+.hero-copy h1 { font-size: clamp(3.2rem, 6.4vw, 6rem); }
+.logo { margin-right: .6em; }
+@media (max-width: 520px) {
+  .logo { font-size: 1.7rem; }
+  .hero-copy h1 { font-size: clamp(2.6rem, 12vw, 3.7rem); }
+  .panel h1 { font-size: clamp(2rem, 9vw, 2.6rem); }
 }
