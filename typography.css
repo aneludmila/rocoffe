@@ -1,0 +1,36 @@
+/* Shared RoCoffee type system */
+:root {
+  --font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-accent: "Montserrat", Arial, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+}
+body { font-family: var(--font-body); font-size: 17px; line-height: 1.6; }
+h1, h2, h3, .serif, blockquote { font-family: var(--font-heading); font-weight: 600; letter-spacing: -.025em; }
+h1 { line-height: 1.04; }
+h2, h3 { line-height: 1.12; }
+.logo, .brand, .brand b, .brand-logo {
+  font-family: var(--font-heading); font-weight: 600; letter-spacing: -.035em;
+}
+.logo:after, .brand-logo:after { left: 1.55em; top: -.2em; }
+.links, .nav-actions, .btn, .cta, .tabs button, .nav button,
+.kicker, .eyebrow, .tag, .text-link, .back, .topbar, .top,
+.field label, .promise b, .notes, .progress span:after {
+  font-family: var(--font-accent);
+}
+button, input, select, textarea { font-family: var(--font-body); }
+.btn, .cta, .tabs button, .nav button { font-family: var(--font-accent); letter-spacing: .08em; }
+.kicker, .eyebrow { letter-spacing: .18em; }
+p { text-wrap: pretty; }
+.plan p, .plan li { font-size: 1rem; }
+.promise span { font-size: .88rem; }
+.field label { font-size: .72rem; }
+.choice small, .row, .note, .feedback { font-size: .92rem; }
+.plan .price { font-family: var(--font-body); font-variant-numeric: tabular-nums; }
+.hero h1 { letter-spacing: -.035em; line-height: 1.02; }
+.brand small { font-family: var(--font-accent); }
+@media (max-width: 520px) {
+  .hero h1 { font-size: clamp(3.2rem, 14vw, 3.7rem); }
+  .logo { font-size: 1.9rem; }
+  .topbar { letter-spacing: .1em; }
+  .links.right .btn { font-size: .65rem; letter-spacing: .05em; }
+}

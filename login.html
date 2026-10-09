@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Entrar — RoCoffe</title>
+    <title>Entrar — RoCoffee</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Montserrat:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
@@ -48,7 +48,7 @@
       }
       .visual blockquote {
         font:
-          500 3rem/1.05 "Playfair Display",
+          500 3rem/1.05 "Cormorant Garamond",
           serif;
         max-width: 580px;
         margin: 0;
@@ -71,7 +71,7 @@
       }
       .brand b {
         font:
-          600 2.35rem "Playfair Display",
+          600 2.35rem "Cormorant Garamond",
           serif;
         letter-spacing: -0.07em;
       }
@@ -103,7 +103,7 @@
       }
       h1 {
         font:
-          600 2.4rem "Playfair Display",
+          600 2.4rem "Cormorant Garamond",
           serif;
         margin: 0 0 8px;
       }
@@ -243,7 +243,7 @@
         }
       }
     </style>
-  </head>
+  <link rel="stylesheet" href="typography.css"></head>
   <body>
     <main class="page">
       <section class="visual">
@@ -254,7 +254,7 @@
       <section class="side">
         <div class="card">
           <a class="brand" href="index.html"
-            ><b>RoCoffe</b><small>Cafés de Rondônia</small></a
+            ><b>RoCoffee</b><small>Cafés de Rondônia</small></a
           >
           <div class="tabs">
             <button class="active" data-tab="login">Entrar</button
@@ -262,7 +262,7 @@
           </div>
           <section id="login-panel">
             <h1>Que bom ter você aqui.</h1>
-            <p>Entre para acompanhar sua experiência RoCoffe.</p>
+            <p>Entre para acompanhar sua experiência RoCoffee.</p>
             <form id="login-form">
               <div class="field">
                 <label>E-mail</label
@@ -323,7 +323,7 @@
             </form>
           </section>
           <div id="feedback" class="feedback" aria-live="polite"></div>
-          <a class="back" href="index.html">← Voltar para a RoCoffe</a>
+          <a class="back" href="index.html">← Voltar para a RoCoffee</a>
         </div>
       </section>
     </main>
@@ -388,7 +388,7 @@
       };
       document.querySelector("#signup-form").onsubmit = async (e) => {
         e.preventDefault();
-        showBrewing("Criando sua conta RoCoffe...");
+        showBrewing("Criando sua conta RoCoffee...");
         const n = document.querySelector("#signup-name").value,
           w = document.querySelector("#signup-whatsapp").value,
           { data, error } = await supabase.auth.signUp({

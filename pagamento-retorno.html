@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Pagamento — RoCoffe</title>
+    <title>Pagamento — RoCoffee</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Montserrat:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
@@ -42,12 +42,12 @@
       }
       .brand {
         font:
-          600 2rem "Playfair Display",
+          600 2rem "Cormorant Garamond",
           serif;
       }
       h1 {
         font:
-          600 clamp(2.5rem, 7vw, 4.4rem) / 1 "Playfair Display",
+          600 clamp(2.5rem, 7vw, 4.4rem) / 1 "Cormorant Garamond",
           serif;
         margin: 28px 0 16px;
       }
@@ -72,10 +72,10 @@
         }
       }
     </style>
-  </head>
+  <link rel="stylesheet" href="typography.css"></head>
   <body>
     <main class="card">
-      <div class="brand">RoCoffe</div>
+      <div class="brand">RoCoffee</div>
       <h1 id="title">Confirmando seu pagamento...</h1>
       <p class="status" id="message">
         Só um instante enquanto conferimos o retorno do Mercado Pago.
@@ -102,7 +102,7 @@
           if (!error && data?.status === "active") {
             title.textContent = "Pagamento aprovado!";
             message.textContent =
-              "Sua primeira experiência RoCoffe está confirmada.";
+              "Sua primeira experiência RoCoffee está confirmada.";
           } else if (!error && data?.status === "pending_payment") {
             title.textContent = "Pagamento em análise.";
             message.textContent =
