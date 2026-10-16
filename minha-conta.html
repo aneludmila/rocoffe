@@ -298,7 +298,7 @@
                 `<div class="item"><strong>${x.label}</strong><small>${x.street}, ${x.number} — ${x.city}/${x.state}</small></div>`,
             )
             .join("");
-        document.querySelector("#account-loader").remove();
+        document.querySelector("#account-loader")?.remove();
         document.querySelectorAll(".pay-pending").forEach((button) => {
           button.onclick = async () => {
             button.disabled = true;
@@ -316,9 +316,18 @@
           };
         });
       }
-      document.querySelector("#logout").onclick = async () => {
-        await supabase.auth.signOut();
-        location.href = "index.html";
+      document.querySelector("#logout").onclick = async (event) => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) throw error;
+          window.location.replace("index.html");
+        } catch (error) {
+          console.error("Erro ao sair da conta:", error);
+          alert("Não foi possível sair da conta. Tente novamente.");
+          button.disabled = false;
+        }
       };
     </script>
   </body>
