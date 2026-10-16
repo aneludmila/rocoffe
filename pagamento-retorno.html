@@ -73,7 +73,7 @@
         }
       }
     </style>
-  <link rel="stylesheet" href="typography.css"><script id="rocoffee-ios-mp4">document.addEventListener("DOMContentLoaded",()=>{if(!document.documentElement.classList.contains("rocoffee-ios"))return;const video=document.querySelector("#brewing-loader .brewing-video");const fallback=document.querySelector("#brewing-loader .rocoffee-loader-fallback");if(!video)return;video.querySelectorAll("source").forEach(s=>s.remove());const source=document.createElement("source");source.src="rocoffee-animacao-iphone.mp4.mp4";source.type="video/mp4";video.appendChild(source);video.muted=true;video.defaultMuted=true;video.autoplay=true;video.loop=true;video.playsInline=true;video.setAttribute("playsinline","");video.setAttribute("webkit-playsinline","");video.preload="auto";const showFallback=()=>{video.style.setProperty("display","none","important");if(fallback)fallback.style.setProperty("display","flex","important")};video.addEventListener("error",showFallback);video.addEventListener("loadeddata",()=>{video.style.setProperty("display","block","important");if(fallback)fallback.style.setProperty("display","none","important")});video.load();const p=video.play();if(p&&typeof p.catch==="function")p.catch(()=>{ /* iOS Low Power Mode may block autoplay; keep first video frame visible */ });});</script></head>
+  <link rel="stylesheet" href="typography.css"><script id="rocoffee-ios-mp4">document.addEventListener("DOMContentLoaded",()=>{if(!document.documentElement.classList.contains("rocoffee-ios"))return;const video=document.querySelector("#brewing-loader .brewing-video");const fallback=document.querySelector("#brewing-loader .rocoffee-loader-fallback");if(!video)return;video.querySelectorAll("source").forEach(s=>s.remove());const source=document.createElement("source");source.src="rocoffee-animacao-iphone.mp4.mp4";source.type="video/mp4";video.appendChild(source);video.muted=true;video.defaultMuted=true;video.autoplay=true;video.loop=true;video.playsInline=true;video.setAttribute("playsinline","");video.setAttribute("webkit-playsinline","");video.setAttribute("disablepictureinpicture","");video.setAttribute("controlslist","nodownload noplaybackrate");video.controls=false;video.preload="metadata";const fallbackMode=()=>{video.pause();video.style.setProperty("display","none","important");if(fallback)fallback.style.setProperty("display","flex","important")};video.addEventListener("error",fallbackMode);video.load();const p=video.play();if(p&&typeof p.catch==="function")p.catch(fallbackMode);});</script></head>
   <body>
     <main class="card">
       <div class="brand">RoC<span class="wordmark-initial">o</span>ffee</div>
@@ -119,6 +119,7 @@
   }
   window.hideBrewing = window.hideBrewing || hideLoader;
   window.addEventListener('load', () => window.setTimeout(hideLoader, 250), { once: true });
+  window.setTimeout(hideLoader, 3500); // Nunca bloquear o site se um vídeo ou recurso externo não terminar de carregar.
   // Fallback for cached pages or scripts that execute after load.
   if (document.readyState === 'complete') window.setTimeout(hideLoader, 450);
   document.addEventListener('click', (event) => {
