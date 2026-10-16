@@ -203,14 +203,59 @@
         </section>
       </div>
     </main>
-    <div class="loader" id="account-loader">
-      <div>
-        <div class="drip"></div>
-        <div class="cup"></div>
-        <p>Buscando suas histórias...</p>
-      </div>
-    </div>
-    <script type="module">
+    <div id="brewing-loader" class="loader visible" role="status" aria-live="polite">
+  <div class="brewing-content">
+    <video class="brewing-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="cafe-sem-fundo.webm" type="video/webm">
+    </video>
+    <p data-loading-message>Preparando sua experiência...</p>
+  </div>
+</div>
+<style id="rocoffee-loader-styles">
+  #brewing-loader.loader {
+    position: fixed !important; inset: 0 !important; z-index: 99999 !important;
+    display: grid !important; place-items: center !important;
+    padding: 24px; background: #253015 !important; color: #f2eadf !important;
+    opacity: 0; visibility: hidden; pointer-events: none;
+    transition: opacity .28s ease, visibility .28s ease;
+  }
+  #brewing-loader.loader.visible { opacity: 1; visibility: visible; pointer-events: auto; }
+  #brewing-loader.loader[hidden] { display: none !important; }
+  #brewing-loader.loader.is-hiding { opacity: 0; visibility: hidden; pointer-events: none; }
+  #brewing-loader .brewing-content { display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 12px; text-align:center; }
+  #brewing-loader .brewing-video { display:block; width:min(260px, 68vw); max-height:260px; object-fit:contain; }
+  #brewing-loader p { margin:0; color:#f2eadf; font:500 14px/1.5 Montserrat, sans-serif; letter-spacing:.04em; }
+  @media (prefers-reduced-motion: reduce) { #brewing-loader { transition:none; } }
+</style>
+<script>
+(function () {
+  const loader = document.getElementById('brewing-loader');
+  if (!loader) return;
+  let hideTimer;
+  function hideLoader() {
+    loader.classList.add('is-hiding');
+    loader.classList.remove('visible');
+    window.setTimeout(() => { loader.hidden = true; loader.classList.remove('is-hiding'); }, 300);
+  }
+  window.hideBrewing = window.hideBrewing || hideLoader;
+  window.addEventListener('load', () => window.setTimeout(hideLoader, 250), { once: true });
+  // Fallback for cached pages or scripts that execute after load.
+  if (document.readyState === 'complete') window.setTimeout(hideLoader, 450);
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const href = link.getAttribute('href') || '';
+    if (!href || href.startsWith('#') || link.target === '_blank' || link.hasAttribute('download')) return;
+    let destination;
+    try { destination = new URL(link.href, location.href); } catch (_) { return; }
+    if (destination.origin !== location.origin || (destination.pathname === location.pathname && destination.search === location.search)) return;
+    loader.hidden = false;
+    loader.classList.remove('is-hiding');
+    loader.classList.add('visible');
+  });
+})();
+</script>
+<script type="module">
       import {
         currentUser,
         supabase,
