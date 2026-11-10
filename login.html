@@ -160,6 +160,8 @@
       .hidden {
         display: none;
       }
+      .assist-link { border: 0; background: none; padding: 0; margin: 3px 0 10px; color: var(--cafe); font: 600 .78rem Montserrat, sans-serif; text-decoration: underline; cursor: pointer; }
+      .assist-link:hover { color: var(--espresso); }
       .back {
         display: inline-block;
         margin-top: 20px;
@@ -284,7 +286,26 @@
                   autocomplete="current-password"
                 />
               </div>
+              <button type="button" class="assist-link" id="forgot-password">Esqueci minha senha</button>
               <button class="btn">Entrar</button>
+            </form>
+          </section>
+          <section id="forgot-panel" class="hidden">
+            <h1>Recupere seu acesso.</h1>
+            <p>Informe o e-mail cadastrado na RoCoffee para receber um link seguro de redefinição.</p>
+            <form id="forgot-form">
+              <div class="field"><label for="forgot-email">E-mail</label><input id="forgot-email" type="email" required autocomplete="email" /></div>
+              <button class="btn" type="submit">Enviar link de recuperação</button>
+            </form>
+            <button type="button" class="assist-link" id="back-login">Voltar para entrar</button>
+          </section>
+          <section id="reset-panel" class="hidden">
+            <h1>Crie uma nova senha.</h1>
+            <p>Defina uma nova senha para sua conta RoCoffee.</p>
+            <form id="reset-form">
+              <div class="field"><label for="reset-password">Nova senha</label><input id="reset-password" type="password" required minlength="8" autocomplete="new-password" /></div>
+              <div class="field"><label for="reset-confirm">Confirme a nova senha</label><input id="reset-confirm" type="password" required minlength="8" autocomplete="new-password" /></div>
+              <button class="btn" type="submit">Salvar nova senha</button>
             </form>
           </section>
           <section id="cadastro-panel" class="hidden">
@@ -400,18 +421,67 @@
         f.textContent = t;
         f.className = "feedback " + c;
       }
+      const isReset = new URLSearchParams(location.search).get("mode") === "reset";
+      const panels = ["login", "cadastro", "forgot", "reset"];
+      function openPanel(name) {
+        for (const p of panels) document.getElementById(p + "-panel").classList.toggle("hidden", p !== name);
+        document.querySelector(".tabs").classList.toggle("hidden", name === "reset");
+        document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+        msg("");
+      }
+      document.getElementById("forgot-password").onclick = () => {
+        document.getElementById("forgot-email").value = document.getElementById("login-email").value;
+        openPanel("forgot");
+      };
+      document.getElementById("back-login").onclick = () => openPanel("login");
+      document.getElementById("forgot-form").onsubmit = async (e) => {
+        e.preventDefault();
+        const button = e.submitter || e.currentTarget.querySelector("button[type=submit]");
+        button.disabled = true;
+        try {
+          const { error } = await supabase.auth.resetPasswordForEmail(document.getElementById("forgot-email").value.trim(), {
+            redirectTo: location.origin + "/login.html?mode=reset"
+          });
+          if (error) msg("Não foi possível enviar o link agora. Tente novamente em instantes.", "error");
+          else msg("Se o e-mail estiver cadastrado, você receberá um link de recuperação. Confira também o spam.", "ok");
+        } catch (_) { msg("Erro de conexão. Tente novamente.", "error"); }
+        finally { button.disabled = false; }
+      };
+      document.getElementById("reset-form").onsubmit = async (e) => {
+        e.preventDefault();
+        const pass = document.getElementById("reset-password").value;
+        if (pass !== document.getElementById("reset-confirm").value) return msg("As senhas não coincidem.", "error");
+        const button = e.submitter || e.currentTarget.querySelector("button[type=submit]");
+        button.disabled = true;
+        try {
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          if (sessionError || !session) return msg("O link expirou ou é inválido. Solicite outro na tela de login.", "error");
+          const { error } = await supabase.auth.updateUser({ password: pass });
+          if (error) return msg(error.message, "error");
+          await supabase.auth.signOut();
+          history.replaceState(null, "", "login.html");
+          openPanel("login");
+          msg("Senha atualizada! Entre com sua nova senha.", "ok");
+        } catch (_) { msg("Não foi possível salvar sua senha. Tente novamente.", "error"); }
+        finally { button.disabled = false; }
+      };
+      supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") openPanel("reset");
+      });
+      if (isReset) {
+        openPanel("reset");
+        // Recovery tokens are processed automatically by supabase-js.
+        supabase.auth.getSession().then(({data}) => {
+          if (!data.session) msg("Link inválido ou expirado. Solicite uma nova recuperação.", "error");
+        });
+      }
       document.querySelectorAll("[data-tab]").forEach(
         (b) =>
           (b.onclick = () => {
             document
               .querySelectorAll("[data-tab]")
               .forEach((x) => x.classList.toggle("active", x === b));
-            document
-              .querySelector("#login-panel")
-              .classList.toggle("hidden", b.dataset.tab !== "login");
-            document
-              .querySelector("#cadastro-panel")
-              .classList.toggle("hidden", b.dataset.tab !== "cadastro");
+            openPanel(b.dataset.tab);
             msg("");
           }),
       );
@@ -452,7 +522,7 @@
         else
           msg("Conta criada! Confirme o e-mail enviado e depois entre.", "ok");
       };
-      if (await currentUser()) location.href = next;
+      if (!isReset && await currentUser()) location.href = next;
     </script>
   </body>
 </html>
