@@ -160,6 +160,11 @@
       .hidden {
         display: none;
       }
+      .security-note { display:flex; align-items:center; gap:10px; margin: 0 0 23px; padding:12px 14px; background:#f1f4eb; border:1px solid #dbe5d1; border-radius:9px; color:#26351d; font:600 .76rem/1.5 Montserrat,sans-serif; }
+      .security-note span { display:block; }
+      .security-note small { display:block; font:400 .7rem/1.5 Montserrat,sans-serif; margin-top:2px; color:#526046; }
+      .recovery-help { padding:14px 16px; margin: 16px 0; background:#fbf7f0; border-left:3px solid var(--caramelo); font-size:.8rem; line-height:1.65; color:#665244; }
+      .recovery-help a { color:var(--espresso); font-weight:700; }
       .assist-link { border: 0; background: none; padding: 0; margin: 3px 0 10px; color: var(--cafe); font: 600 .78rem Montserrat, sans-serif; text-decoration: underline; cursor: pointer; }
       .assist-link:hover { color: var(--espresso); }
       .back {
@@ -291,6 +296,7 @@
             </form>
           </section>
           <section id="forgot-panel" class="hidden">
+            <div class="security-note" role="note">🔒 <span>Recuperação de conta RoCoffee<small>Você está no site oficial, em uma conexão HTTPS.</small></span></div>
             <h1>Recupere seu acesso.</h1>
             <p>Informe o e-mail cadastrado na RoCoffee para receber um link seguro de redefinição.</p>
             <form id="forgot-form">
@@ -300,12 +306,14 @@
             <button type="button" class="assist-link" id="back-login">Voltar para entrar</button>
           </section>
           <section id="reset-panel" class="hidden">
+            <div class="security-note" role="note">🔒 <span>Área segura da RoCoffee<small>Protegida por HTTPS e autenticação do Supabase.</small></span></div>
             <h1>Crie uma nova senha.</h1>
-            <p>Defina uma nova senha para sua conta RoCoffee.</p>
+            <p>Escolha uma senha nova com pelo menos 8 caracteres. Nunca compartilhe seu link de recuperação.</p>
+            <div class="recovery-help" id="recovery-status" role="status" aria-live="polite">Validando seu link de recuperação...</div>
             <form id="reset-form">
               <div class="field"><label for="reset-password">Nova senha</label><input id="reset-password" type="password" required minlength="8" autocomplete="new-password" /></div>
               <div class="field"><label for="reset-confirm">Confirme a nova senha</label><input id="reset-confirm" type="password" required minlength="8" autocomplete="new-password" /></div>
-              <button class="btn" type="submit">Salvar nova senha</button>
+              <button class="btn" type="submit" id="reset-submit" disabled>Salvar nova senha</button>
             </form>
           </section>
           <section id="cadastro-panel" class="hidden">
@@ -422,6 +430,12 @@
         f.className = "feedback " + c;
       }
       const isReset = new URLSearchParams(location.search).get("mode") === "reset";
+      let recoveryAuthorized = false;
+      const recoveryStatus = document.getElementById("recovery-status");
+      function setRecoveryStatus(text, ready = false) {
+        recoveryStatus.textContent = text;
+        document.getElementById("reset-submit").disabled = !ready;
+      }
       const panels = ["login", "cadastro", "forgot", "reset"];
       function openPanel(name) {
         for (const p of panels) document.getElementById(p + "-panel").classList.toggle("hidden", p !== name);
@@ -440,7 +454,7 @@
         button.disabled = true;
         try {
           const { error } = await supabase.auth.resetPasswordForEmail(document.getElementById("forgot-email").value.trim(), {
-            redirectTo: location.origin + "/login.html?mode=reset"
+            redirectTo: "https://rocoffee.netlify.app/login.html?mode=reset"
           });
           if (error) msg("Não foi possível enviar o link agora. Tente novamente em instantes.", "error");
           else msg("Se o e-mail estiver cadastrado, você receberá um link de recuperação. Confira também o spam.", "ok");
@@ -449,6 +463,7 @@
       };
       document.getElementById("reset-form").onsubmit = async (e) => {
         e.preventDefault();
+        if (!recoveryAuthorized) return msg("Solicite um novo link para redefinir sua senha com segurança.", "error");
         const pass = document.getElementById("reset-password").value;
         if (pass !== document.getElementById("reset-confirm").value) return msg("As senhas não coincidem.", "error");
         const button = e.submitter || e.currentTarget.querySelector("button[type=submit]");
@@ -458,22 +473,27 @@
           if (sessionError || !session) return msg("O link expirou ou é inválido. Solicite outro na tela de login.", "error");
           const { error } = await supabase.auth.updateUser({ password: pass });
           if (error) return msg(error.message, "error");
+          recoveryAuthorized = false;
           await supabase.auth.signOut();
           history.replaceState(null, "", "login.html");
           openPanel("login");
           msg("Senha atualizada! Entre com sua nova senha.", "ok");
         } catch (_) { msg("Não foi possível salvar sua senha. Tente novamente.", "error"); }
-        finally { button.disabled = false; }
+        finally { button.disabled = !recoveryAuthorized; }
       };
       supabase.auth.onAuthStateChange((event) => {
-        if (event === "PASSWORD_RECOVERY") openPanel("reset");
+        if (event === "PASSWORD_RECOVERY") {
+          recoveryAuthorized = true;
+          openPanel("reset");
+          setRecoveryStatus("Link confirmado! Agora você pode cadastrar sua nova senha.", true);
+        }
       });
       if (isReset) {
         openPanel("reset");
         // Recovery tokens are processed automatically by supabase-js.
-        supabase.auth.getSession().then(({data}) => {
-          if (!data.session) msg("Link inválido ou expirado. Solicite uma nova recuperação.", "error");
-        });
+        window.setTimeout(() => {
+          if (!recoveryAuthorized) setRecoveryStatus("Não foi possível validar o link. Solicite outro pelo botão “Esqueci minha senha” na tela de login.");
+        }, 2200);
       }
       document.querySelectorAll("[data-tab]").forEach(
         (b) =>
