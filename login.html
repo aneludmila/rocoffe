@@ -489,7 +489,12 @@
           const { error } = await supabase.auth.resetPasswordForEmail(document.getElementById("forgot-email").value.trim(), {
             redirectTo: "https://rocoffee.netlify.app/login.html?mode=reset"
           });
-          if (error) msg("Não foi possível enviar o link agora. Tente novamente em instantes.", "error");
+          if (error) {
+            const limited = error.status === 429 || error.code === "over_email_send_rate_limit";
+            msg(limited
+              ? "Limite de e-mails de recuperação atingido. Aguarde a liberação do envio antes de solicitar outro link."
+              : "Não foi possível enviar o e-mail. Confira a configuração do serviço de autenticação e tente novamente.", "error");
+          }
           else msg("Se o e-mail estiver cadastrado, você receberá um link de recuperação. Confira também o spam.", "ok");
         } catch (_) { msg("Erro de conexão. Tente novamente.", "error"); }
         finally { button.disabled = false; }
