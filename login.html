@@ -453,6 +453,21 @@
         f.textContent = t;
         f.className = "feedback " + c;
       }
+      function authMessage(error, action = "login") {
+        if (error?.status === 429 || /rate.limit|too many requests/i.test(error?.message || "")) {
+          return "Muitas tentativas no momento. Aguarde antes de tentar novamente. Não é necessário clicar várias vezes.";
+        }
+        if (error?.code === "email_not_confirmed") return "Confirme seu e-mail para acessar a RoCoffe. Verifique também a caixa de spam.";
+        if (error?.code === "invalid_credentials") return "E-mail ou senha incorretos. Confira os dados ou use Esqueci minha senha.";
+        if (error?.code === "user_already_exists") return "Este e-mail já está cadastrado. Tente entrar ou recuperar sua senha.";
+        if (error?.code === "weak_password") return "Escolha uma senha mais forte para proteger sua conta.";
+        if (action === "cadastro") return "Não foi possível concluir seu cadastro. Confira os dados e tente novamente mais tarde.";
+        if (action === "recuperacao") return "Não foi possível solicitar o link agora. Tente novamente mais tarde.";
+        return "Não foi possível entrar. Confira seus dados e tente novamente.";
+      }
+      function submitButton(form) {
+        return form.querySelector('button[type="submit"], input[type="submit"]');
+      }
       const isReset = new URLSearchParams(location.search).get("mode") === "reset";
       const recoveryHash = new URLSearchParams(location.hash.slice(1));
       if (isReset) document.body.classList.add("recovery-view");
@@ -489,12 +504,7 @@
           const { error } = await supabase.auth.resetPasswordForEmail(document.getElementById("forgot-email").value.trim(), {
             redirectTo: "https://rocoffee.netlify.app/login.html?mode=reset"
           });
-          if (error) {
-            const limited = error.status === 429 || error.code === "over_email_send_rate_limit";
-            msg(limited
-              ? "Limite de e-mails de recuperação atingido. Aguarde a liberação do envio antes de solicitar outro link."
-              : "Não foi possível enviar o e-mail. Confira a configuração do serviço de autenticação e tente novamente.", "error");
-          }
+          if (error) msg(authMessage(error, "recuperacao"), "error");
           else msg("Se o e-mail estiver cadastrado, você receberá um link de recuperação. Confira também o spam.", "ok");
         } catch (_) { msg("Erro de conexão. Tente novamente.", "error"); }
         finally { button.disabled = false; }
@@ -551,40 +561,69 @@
       );
       document.querySelector("#login-form").onsubmit = async (e) => {
         e.preventDefault();
+        const form = e.currentTarget;
+        const button = submitButton(form);
+        if (button?.disabled) return;
+        if (button) button.disabled = true;
+        msg("");
         showBrewing("Reconhecendo seu perfil...");
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: document.querySelector("#login-email").value,
-          password: document.querySelector("#login-password").value,
-        });
-        if (!error && data.user)
-          await saveProfile(
-            data.user.id,
-            data.user.user_metadata?.full_name || "",
-            data.user.user_metadata?.whatsapp || "",
-          );
-        hideBrewing();
-        if (error) return msg("Confira seu e-mail e sua senha.", "error");
-        location.href = next;
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: document.querySelector("#login-email").value.trim(),
+            password: document.querySelector("#login-password").value,
+          });
+          if (error) return msg(authMessage(error), "error");
+          if (!data?.user) return msg("Não foi possível confirmar sua sessão. Tente novamente.", "error");
+          try {
+            await saveProfile(
+              data.user.id,
+              data.user.user_metadata?.full_name || "",
+              data.user.user_metadata?.whatsapp || "",
+            );
+          } catch (profileError) {
+            console.warn("Perfil não atualizado; login mantido.", profileError);
+          }
+          location.href = next;
+        } catch (error) {
+          msg("Falha de conexão ao entrar. Verifique sua internet e tente novamente.", "error");
+        } finally {
+          hideBrewing();
+          if (button) button.disabled = false;
+        }
       };
       document.querySelector("#signup-form").onsubmit = async (e) => {
         e.preventDefault();
-        showBrewing("Criando sua conta RoCoffee...");
-        const n = document.querySelector("#signup-name").value,
-          w = document.querySelector("#signup-whatsapp").value,
-          { data, error } = await supabase.auth.signUp({
-            email: document.querySelector("#signup-email").value,
+        const form = e.currentTarget;
+        const button = submitButton(form);
+        if (button?.disabled) return;
+        if (button) button.disabled = true;
+        msg("");
+        showBrewing("Criando sua conta RoCoffe...");
+        try {
+          const n = document.querySelector("#signup-name").value.trim();
+          const w = document.querySelector("#signup-whatsapp").value.trim();
+          const { data, error } = await supabase.auth.signUp({
+            email: document.querySelector("#signup-email").value.trim(),
             password: document.querySelector("#signup-password").value,
             options: {
               emailRedirectTo: `${location.origin}/login.html?next=${encodeURIComponent(next)}`,
               data: { full_name: n, whatsapp: w },
             },
           });
-        if (!error && data.session) await saveProfile(data.user.id, n, w);
-        hideBrewing();
-        if (error) return msg(error.message, "error");
-        if (data.session) location.href = next;
-        else
-          msg("Conta criada! Confirme o e-mail enviado e depois entre.", "ok");
+          if (error) return msg(authMessage(error, "cadastro"), "error");
+          if (data?.session && data?.user) {
+            try { await saveProfile(data.user.id, n, w); }
+            catch (profileError) { console.warn("Perfil não atualizado; cadastro mantido.", profileError); }
+            location.href = next;
+          } else {
+            msg("Se o cadastro puder ser concluído, você receberá um e-mail de confirmação. Confira também o spam.", "ok");
+          }
+        } catch (error) {
+          msg("Falha de conexão ao cadastrar. Verifique sua internet e tente novamente.", "error");
+        } finally {
+          hideBrewing();
+          if (button) button.disabled = false;
+        }
       };
       if (!isReset && await currentUser()) location.href = next;
     </script>
