@@ -445,7 +445,7 @@
       const rawNext =
           new URLSearchParams(location.search).get("next") ||
           "minha-conta.html",
-        next = /^\/?(assinatura|minha-conta|index|pagamento-retorno)\.html(?:[?#].*)?$/.test(rawNext)
+        next = (/^\/?(assinatura|minha-conta|index|pagamento-retorno)\.html(?:[?#].*)?$/.test(rawNext) || /^\/?admin\/?$/.test(rawNext))
           ? rawNext.replace(/^\/+/, "")
           : "minha-conta.html",
         f = document.querySelector("#feedback");
