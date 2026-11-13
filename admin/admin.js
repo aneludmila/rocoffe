@@ -82,61 +82,156 @@ async function loadVisits(){
   $("visits-note").textContent="Últimos 30 dias · apenas visitas com consentimento · "+(rows.length===2000?"limite de 2.000 eventos nesta versão; números podem estar incompletos.":"sem idade e gênero.");
 }
 
+
 let heatmapData=[];
 let heatLoaded=false;
+let previewReady=false;
+let previewPage="";
+let previewWidth=0;
+let previewHeight=0;
 const HEAT_WIDTHS={computador:1200,celular:390,tablet:768};
+const heatFrame=$("heat-frame");
+const heatCanvas=$("heat-canvas");
+function currentHeatPage(){return $("heat-page").value;}
+function currentHeatWidth(){return HEAT_WIDTHS[$("heat-device").value];}
+function sizeHeatPreview(){
+  const doc=heatFrame.contentDocument;
+  if(!doc?.body)return false;
+  // Preview is sandboxed without allow-scripts; the normal video loader never dismisses itself.
+  // Remove that preview-only overlay without changing the production storefront.
+  doc.querySelector("#brewing-loader")?.remove();
+  doc.querySelector("#account-loader")?.remove();
+  const css=doc.getElementById("rc-preview-cleanup")||doc.createElement("style");
+  css.id="rc-preview-cleanup";
+  css.textContent=`#brewing-loader,.loader,.rocoffee-ios-gif,.brewing-video,#rc-privacy,#rc-privacy-link{display:none!important}html,body{overflow:visible!important}html{scroll-behavior:auto!important}*{animation-duration:0s!important;transition-duration:0s!important}`;
+  if(!css.isConnected)doc.head.append(css);
+  doc.querySelectorAll("video").forEach(v=>{v.pause();v.removeAttribute("autoplay");});
+  const width=currentHeatWidth();
+  const body=doc.body,root=doc.documentElement;
+  const height=Math.max(800,body.scrollHeight,body.offsetHeight,root.scrollHeight,root.offsetHeight);
+  previewHeight=Math.min(16000,height);
+  previewWidth=width;
+  heatFrame.style.width=width+"px";
+  heatFrame.style.height=previewHeight+"px";
+  const stage=$("heat-stage");
+  stage.style.width=width+"px";stage.style.height=previewHeight+"px";
+  heatCanvas.style.width=width+"px";
+  heatCanvas.style.height=previewHeight+"px";
+  const scale=Math.min(1,Math.max(0.05,($("heat-frame-wrap").clientWidth-2)/width));
+  stage.style.transform=`scale(${scale})`;
+  $("heat-frame-wrap").style.height=Math.ceil(previewHeight*scale)+"px";
+  previewReady=true;
+  return true;
+}
+function setHeatPreview(){
+  const page=currentHeatPage(),width=currentHeatWidth();
+  const source=page==="/assinatura.html"?"../assinatura.html":"../index.html";
+  previewReady=false;
+  heatFrame.style.width=width+"px";
+  heatFrame.style.height="16000px";
+  const stage=$("heat-stage");
+  stage.style.width=width+"px";
+  stage.style.height="16000px";
+  const url=source+"?heat_preview="+width;
+  if(heatFrame.getAttribute("src")!==url)heatFrame.setAttribute("src",url);
+  else {sizeHeatPreview();renderHeat();}
+}
+heatFrame.addEventListener("load",()=>{
+  try {
+    if(!sizeHeatPreview())throw new Error("Página sem conteúdo");
+    // Font loading can change page height; measure once after fonts settle.
+    heatFrame.contentDocument?.fonts?.ready?.then(()=>{
+      if(sizeHeatPreview())renderHeat();
+    }).catch(()=>{});
+    renderHeat();
+  } catch(e){
+    $("heat-status").textContent="Não foi possível preparar a prévia da página. Atualize o painel.";
+  }
+});
 async function loadHeatmap(){
   if(!heatLoaded){
     heatLoaded=true;
-    $("heat-page").addEventListener("change",drawHeatmap);
-    $("heat-device").addEventListener("change",drawHeatmap);
-    $("heat-refresh").addEventListener("click",()=>{heatLoaded=false;void loadHeatmap();});
+    $("heat-page").addEventListener("change",()=>{setHeatPreview();renderHeat();});
+    $("heat-device").addEventListener("change",()=>{setHeatPreview();renderHeat();});
+    $("heat-period").addEventListener("change",()=>void fetchHeatData());
+    $("heat-refresh").addEventListener("click",()=>void fetchHeatData());
   }
-  $("heat-status").textContent="Carregando cliques consentidos…";
-  const after=new Date(Date.now()-30*86400000).toISOString();
+  setHeatPreview();
+  await fetchHeatData();
+}
+async function fetchHeatData(){
+  $("heat-status").textContent="Carregando dados reais de cliques...";
+  const days=Number($("heat-period").value)||30;
+  const after=new Date(Date.now()-days*86400000).toISOString();
   const {data,error}=await supabase.from("analytics_clicks")
-    .select("page,device,viewport_width,x_percent,y_bucket,created_at")
+    .select("page,device,viewport_width,x_percent,y_bucket,y_ratio,created_at")
     .gte("created_at",after).order("created_at",{ascending:false}).limit(2000);
   if(error){
-    $("heat-status").textContent="Não foi possível buscar cliques. Verifique a tabela analytics_clicks no Supabase.";
+    $("heat-status").textContent="Não foi possível carregar os cliques. Confira a tabela analytics_clicks.";
     return;
   }
-  heatmapData=data??[];
-  drawHeatmap();
+  heatmapData=data||[];
+  renderHeat();
 }
-function drawHeatmap(){
-  const page=$("heat-page").value,device=$("heat-device").value;
-  const width=HEAT_WIDTHS[device];
-  const stage=$("heat-stage"),frame=$("heat-frame"),layer=$("heat-layer"),wrap=$("heat-frame-wrap");
-  const rows=heatmapData.filter(r=>(r.page===page||(page==="/index.html"&&r.page==="/"))&&r.device===device);
-  const height=page==="/assinatura.html"?4200:3300;
-  const scale=Math.min(1,Math.max(0.1,(wrap.clientWidth-2)/width));
-  stage.style.width=width+"px";stage.style.height=height+"px";
-  stage.style.transform="scale("+scale+")";
-  wrap.style.height=Math.ceil(height*scale)+"px";
-  frame.style.width=width+"px";frame.style.height=height+"px";
-  layer.replaceChildren();
-  const preview=page.slice(1);
-  if(frame.getAttribute("src")!=="../"+preview)frame.setAttribute("src","../"+preview);
-  // Agrupar pontos na mesma região para tornar as áreas populares visualmente mais intensas.
+function getClickPosition(row,width,height){
+  const x=Math.max(0,Math.min(width,Number(row.x_percent)/100*width));
+  let y;
+  if(row.y_ratio!==null && row.y_ratio!==undefined){
+    y=Number(row.y_ratio)*height;
+  }else{
+    // Backward compatibility with pre-migration click records.
+    const recordedWidth=Number(row.viewport_width)||width;
+    y=(Number(row.y_bucket)||0)*(width/recordedWidth);
+  }
+  return [x,Math.max(0,Math.min(height-1,y))];
+}
+function renderHeat(){
+  const page=currentHeatPage(),device=$("heat-device").value;
+  const records=heatmapData.filter(r=>(r.page===page||(page==="/index.html"&&r.page==="/"))&&r.device===device);
+  const width=previewWidth||currentHeatWidth(),height=previewHeight||3300;
+  if(previewReady)sizeHeatPreview();
+  const ctx=heatCanvas.getContext("2d",{willReadFrequently:true});
+  if(!ctx)return;
+  // Half resolution improves performance on long pages while preserving visually smooth heat.
+  const density=0.5;
+  const cw=Math.ceil(width*density),ch=Math.ceil(height*density);
+  heatCanvas.width=cw;heatCanvas.height=ch;
+  ctx.clearRect(0,0,cw,ch);
+  if(!records.length){
+    $("heat-status").textContent="Nenhum clique consentido encontrado para esta página, dispositivo e período.";
+    return;
+  }
   const bins=new Map();
-  for(const r of rows){
-    const y=Math.min(height-1,Math.max(0,Number(r.y_bucket)||0));
-    const key=r.x_percent+":"+y;
+  for(const record of records){
+    const [x,y]=getClickPosition(record,width,height);
+    const key=Math.round(x/20)+":"+Math.round(y/25);
     bins.set(key,(bins.get(key)||0)+1);
   }
-  const top=Math.max(1,...bins.values());
+  const max=Math.max(...bins.values(),1);
   for(const [key,count] of bins){
-    const [x,y]=key.split(":").map(Number);
-    const dot=document.createElement("div");
-    dot.className="heat-dot";
-    dot.style.left=(x/100*width)+"px";
-    dot.style.top=y+"px";
-    dot.style.opacity=String(Math.min(1,0.22+0.78*(count/top)));
-    layer.append(dot);
+    const [gx,gy]=key.split(":").map(Number);
+    const x=gx*20*density,y=gy*25*density;
+    const radius=(device==="celular"?65:90)*density;
+    const weight=Math.sqrt(count/max);
+    const gradient=ctx.createRadialGradient(x,y,0,x,y,radius);
+    gradient.addColorStop(0,"rgba(255,255,255,"+(0.36+0.57*weight)+")");
+    gradient.addColorStop(0.4,"rgba(255,255,255,"+(0.23+0.40*weight)+")");
+    gradient.addColorStop(1,"rgba(255,255,255,0)");
+    ctx.fillStyle=gradient;
+    ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
   }
-  $("heat-status").textContent=rows.length+" clique(s) encontrados para esta página e dispositivo"+(heatmapData.length===2000?" (amostra limitada aos 2.000 eventos mais recentes).":".");
+  const img=ctx.getImageData(0,0,cw,ch),p=img.data;
+  for(let i=0;i<p.length;i+=4){
+    const a=p[i+3]/255;
+    if(a<0.03){p[i+3]=0;continue;}
+    // Low activity blue/cyan; medium yellow; hotspots orange/red.
+    const stops=[[50,95,255],[49,190,238],[100,209,135],[255,225,48],[255,139,29],[239,35,40]];
+    const scaled=Math.min(0.999,Math.pow(a,0.7))*5;
+    const n=Math.floor(scaled),t=scaled-n;
+    for(let c=0;c<3;c++)p[i+c]=Math.round(stops[n][c]*(1-t)+stops[n+1][c]*t);
+    p[i+3]=Math.round(Math.min(0.76,a*0.78)*255);
+  }
+  ctx.putImageData(img,0,0);
+  $("heat-status").textContent=records.length+" clique(s) nesta visualização. Cores mais quentes indicam regiões com mais interações"+(heatmapData.length===2000?" (amostra limitada aos últimos 2.000 eventos).":".");
 }
-window.addEventListener("resize",()=>{
-  if(!document.querySelector('[data-view="heatmaps"]').hidden && heatLoaded)drawHeatmap();
-});
+window.addEventListener("resize",()=>{if(previewReady&&document.querySelector('[data-view="heatmaps"]')?.hidden===false){sizeHeatPreview();renderHeat();}});
