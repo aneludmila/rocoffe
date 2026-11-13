@@ -107,6 +107,8 @@ function sizeHeatPreview(){
   if(!css.isConnected)doc.head.append(css);
   doc.querySelectorAll("video").forEach(v=>{v.pause();v.removeAttribute("autoplay");});
   const width=currentHeatWidth();
+  // Reset the iframe height before measuring so scrollHeight does not inherit a prior tall viewport.
+  heatFrame.style.height="800px";
   const body=doc.body,root=doc.documentElement;
   const height=Math.max(800,body.scrollHeight,body.offsetHeight,root.scrollHeight,root.offsetHeight);
   previewHeight=Math.min(16000,height);
@@ -128,10 +130,10 @@ function setHeatPreview(){
   const source=page==="/assinatura.html"?"../assinatura.html":"../index.html";
   previewReady=false;
   heatFrame.style.width=width+"px";
-  heatFrame.style.height="16000px";
+  heatFrame.style.height="800px";
   const stage=$("heat-stage");
   stage.style.width=width+"px";
-  stage.style.height="16000px";
+  stage.style.height="800px";
   const url=source+"?heat_preview="+width;
   if(heatFrame.getAttribute("src")!==url)heatFrame.setAttribute("src",url);
   else {sizeHeatPreview();renderHeat();}
