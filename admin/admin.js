@@ -39,6 +39,7 @@ document.querySelectorAll("[data-page]").forEach(btn=>btn.addEventListener("clic
   document.querySelectorAll("[data-page]").forEach(x=>x.classList.toggle("active",x===btn));
   document.querySelectorAll("[data-view]").forEach(x=>x.hidden=x.dataset.view!==btn.dataset.page);
   $("page-title").textContent=titles[btn.dataset.page];
+  if(btn.dataset.page==="heatmaps")void loadHeatmap();
 }));
 function renderCounts(target,entries){
   const el=$(target);el.replaceChildren();
@@ -80,3 +81,62 @@ async function loadVisits(){
   renderCounts("visit-hours",hours);
   $("visits-note").textContent="Últimos 30 dias · apenas visitas com consentimento · "+(rows.length===2000?"limite de 2.000 eventos nesta versão; números podem estar incompletos.":"sem idade e gênero.");
 }
+
+let heatmapData=[];
+let heatLoaded=false;
+const HEAT_WIDTHS={computador:1200,celular:390,tablet:768};
+async function loadHeatmap(){
+  if(!heatLoaded){
+    heatLoaded=true;
+    $("heat-page").addEventListener("change",drawHeatmap);
+    $("heat-device").addEventListener("change",drawHeatmap);
+    $("heat-refresh").addEventListener("click",()=>{heatLoaded=false;void loadHeatmap();});
+  }
+  $("heat-status").textContent="Carregando cliques consentidos…";
+  const after=new Date(Date.now()-30*86400000).toISOString();
+  const {data,error}=await supabase.from("analytics_clicks")
+    .select("page,device,viewport_width,x_percent,y_bucket,created_at")
+    .gte("created_at",after).order("created_at",{ascending:false}).limit(2000);
+  if(error){
+    $("heat-status").textContent="Não foi possível buscar cliques. Verifique a tabela analytics_clicks no Supabase.";
+    return;
+  }
+  heatmapData=data??[];
+  drawHeatmap();
+}
+function drawHeatmap(){
+  const page=$("heat-page").value,device=$("heat-device").value;
+  const width=HEAT_WIDTHS[device];
+  const stage=$("heat-stage"),frame=$("heat-frame"),layer=$("heat-layer"),wrap=$("heat-frame-wrap");
+  const rows=heatmapData.filter(r=>(r.page===page||(page==="/index.html"&&r.page==="/"))&&r.device===device);
+  const height=page==="/assinatura.html"?4200:3300;
+  const scale=Math.min(1,Math.max(0.1,(wrap.clientWidth-2)/width));
+  stage.style.width=width+"px";stage.style.height=height+"px";
+  stage.style.transform="scale("+scale+")";
+  wrap.style.height=Math.ceil(height*scale)+"px";
+  frame.style.width=width+"px";frame.style.height=height+"px";
+  layer.replaceChildren();
+  const preview=page.slice(1);
+  if(frame.getAttribute("src")!=="../"+preview)frame.setAttribute("src","../"+preview);
+  // Agrupar pontos na mesma região para tornar as áreas populares visualmente mais intensas.
+  const bins=new Map();
+  for(const r of rows){
+    const y=Math.min(height-1,Math.max(0,Number(r.y_bucket)||0));
+    const key=r.x_percent+":"+y;
+    bins.set(key,(bins.get(key)||0)+1);
+  }
+  const top=Math.max(1,...bins.values());
+  for(const [key,count] of bins){
+    const [x,y]=key.split(":").map(Number);
+    const dot=document.createElement("div");
+    dot.className="heat-dot";
+    dot.style.left=(x/100*width)+"px";
+    dot.style.top=y+"px";
+    dot.style.opacity=String(Math.min(1,0.22+0.78*(count/top)));
+    layer.append(dot);
+  }
+  $("heat-status").textContent=rows.length+" clique(s) encontrados para esta página e dispositivo"+(heatmapData.length===2000?" (amostra limitada aos 2.000 eventos mais recentes).":".");
+}
+window.addEventListener("resize",()=>{
+  if(!document.querySelector('[data-view="heatmaps"]').hidden && heatLoaded)drawHeatmap();
+});
