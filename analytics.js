@@ -35,7 +35,7 @@ async function sendVisit(){
  const path=location.pathname.replace(/\/$/,"")||"/";
  const cleanPage=(path==="/"?"/":path).slice(0,80);
  // Não registrar páginas administrativas nem URLs desconhecidas.
- if(!/^\/[a-zA-Z0-9/_-]*$/.test(cleanPage)||cleanPage.startsWith("/admin"))return;
+ if(!/^\/[a-zA-Z0-9/_.-]*$/.test(cleanPage)||cleanPage.startsWith("/admin"))return;
  try{
  const {error}=await supabase.from("analytics_visits").insert({session_id:sid,page:cleanPage,source,medium,device:getDevice()});
  if(error)console.warn("RoCoffee: métricas temporariamente indisponíveis.");
