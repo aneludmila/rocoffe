@@ -1,6 +1,6 @@
 // RoCoffee Analytics: eventos de página somente após opt-in explícito.
 import { supabase } from "./supabase-client.js";
-const STORAGE_KEY="rocoffee_analytics_consent_v2";
+const STORAGE_KEY="rocoffee_analytics_consent_v3";
 
 const style=document.createElement("style");
 style.textContent=`#rc-privacy{position:fixed;z-index:10001;left:16px;right:16px;bottom:16px;max-width:570px;background:#fffaf3;border:1px solid #d7c7b3;box-shadow:0 15px 55px #0003;color:#30221b;padding:20px;border-radius:12px;font:14px/1.55 Arial,sans-serif}#rc-privacy[hidden]{display:none!important}#rc-privacy p{margin:8px 0 16px}#rc-privacy-actions{display:flex;gap:9px;flex-wrap:wrap}#rc-privacy button,#rc-privacy-link{font:600 13px Arial,sans-serif;padding:10px 13px;border-radius:5px;cursor:pointer}#rc-privacy button{border:1px solid #253015;background:#253015;color:white}#rc-privacy button.secondary{background:transparent;color:#253015}#rc-privacy-link{position:fixed;right:12px;bottom:12px;z-index:10000;background:#fffaf3;border:1px solid #d7c7b3;color:#30221b}`;
@@ -8,7 +8,7 @@ document.head.appendChild(style);
 const banner=document.createElement("div");
 banner.id="rc-privacy";banner.hidden=true;
 banner.setAttribute("role","dialog");banner.setAttribute("aria-label","Preferências de privacidade");
-banner.innerHTML=`<strong>Privacidade na RoCoffee ☕</strong><p>Com sua permissão, registramos páginas visitadas, origem da visita, tipo de dispositivo e posições aproximadas dos cliques nas páginas públicas para melhorar a loja. Os eventos enviados para análise não incluem nome, e-mail, conteúdo digitado ou endereço IP. A infraestrutura de hospedagem pode processar dados técnicos de conexão. Você pode mudar sua escolha.</p><div id="rc-privacy-actions"><button type="button" id="rc-accept">Aceitar análise</button><button type="button" class="secondary" id="rc-reject">Recusar</button></div>`;
+banner.innerHTML=`<strong>Privacidade na RoCoffee ☕</strong><p>Com sua permissão, registramos páginas visitadas, origem da visita, tipo de dispositivo e posições aproximadas dos cliques e profundidade de rolagem nas páginas públicas para melhorar a loja. Os eventos enviados para análise não incluem nome, e-mail, conteúdo digitado ou endereço IP. A infraestrutura de hospedagem pode processar dados técnicos de conexão. Você pode mudar sua escolha.</p><div id="rc-privacy-actions"><button type="button" id="rc-accept">Aceitar análise</button><button type="button" class="secondary" id="rc-reject">Recusar</button></div>`;
 const manage=document.createElement("button");manage.id="rc-privacy-link";manage.type="button";manage.textContent="Privacidade";
 document.body.append(banner,manage);
 function safeToken(value,max){return String(value||"").normalize("NFKC").replace(/[^a-zA-Z0-9_.-]/g,"_").slice(0,max);}
@@ -42,7 +42,7 @@ async function sendVisit(){
  if(error)console.warn("RoCoffee: métricas temporariamente indisponíveis.");
  }catch{console.warn("RoCoffee: erro de conexão com métricas.");}
 }
-function choose(value){localStorage.setItem(STORAGE_KEY,value);banner.hidden=true;if(value==="accepted")void sendVisit();}
+function choose(value){localStorage.setItem(STORAGE_KEY,value);banner.hidden=true;if(value==="accepted"){void sendVisit();scheduleScroll();}}
 banner.querySelector("#rc-accept").addEventListener("click",()=>choose("accepted"));
 banner.querySelector("#rc-reject").addEventListener("click",()=>choose("rejected"));
 manage.addEventListener("click",()=>{banner.hidden=false;});
@@ -75,3 +75,53 @@ document.addEventListener("click",async(event)=>{
     if(error)console.warn("RoCoffee: mapa de calor temporariamente indisponível.");
   }catch{console.warn("RoCoffee: não foi possível registrar o clique.");}
 },{passive:true});
+
+// Milestones de rolagem: eventos discretos (25/50/75/100%), sem gravar movimentos ou conteúdo.
+const SCROLL_PAGES=new Set(["/","/index.html","/assinatura.html"]);
+const SCROLL_MARKS=[25,50,75,100];
+const scrollSent=new Set();
+let scrollTicking=false;
+function scrollPage(){
+  const page=location.pathname;
+  return SCROLL_PAGES.has(page)?(page==="/"?"/index.html":page):null;
+}
+function scrollConsent(){return localStorage.getItem(STORAGE_KEY)==="accepted";}
+function scrollSessionId(){
+  let sid=sessionStorage.getItem("rc-session-id");
+  if(!sid){sid=crypto.randomUUID();sessionStorage.setItem("rc-session-id",sid);}
+  return sid;
+}
+async function saveScrollMark(page,depth){
+  if(!scrollConsent()||!navigator.onLine)return;
+  try {
+    const {error}=await supabase.from("analytics_scroll_depth").insert({
+      session_id:scrollSessionId(),page,device:getDevice(),depth_percent:depth
+    });
+    if(error)console.warn("RoCoffee: profundidade de rolagem temporariamente indisponível.");
+  }catch {console.warn("RoCoffee: erro ao registrar profundidade.");}
+}
+function measureScroll(){
+  scrollTicking=false;
+  const page=scrollPage();
+  if(!page||!scrollConsent())return;
+  const doc=document.documentElement;
+  const total=Math.max(doc.scrollHeight,document.body.scrollHeight,1);
+  const viewed=Math.min(total,window.scrollY+window.innerHeight);
+  const depth=Math.min(100,Math.floor(100*viewed/total));
+  const session=scrollSessionId();
+  for(const mark of SCROLL_MARKS){
+    if(depth<mark)continue;
+    const key="rc-scroll-v3:"+session+":"+page+":"+mark;
+    if(scrollSent.has(key)||sessionStorage.getItem(key)==="1")continue;
+    scrollSent.add(key);
+    sessionStorage.setItem(key,"1");
+    void saveScrollMark(page,mark);
+  }
+}
+function scheduleScroll(){
+  if(!scrollTicking){scrollTicking=true;requestAnimationFrame(measureScroll);}
+}
+window.addEventListener("scroll",scheduleScroll,{passive:true});
+window.addEventListener("resize",scheduleScroll,{passive:true});
+window.addEventListener("load",scheduleScroll,{once:true});
+if(document.readyState==="complete")scheduleScroll();

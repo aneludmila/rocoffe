@@ -40,6 +40,7 @@ document.querySelectorAll("[data-page]").forEach(btn=>btn.addEventListener("clic
   document.querySelectorAll("[data-view]").forEach(x=>x.hidden=x.dataset.view!==btn.dataset.page);
   $("page-title").textContent=titles[btn.dataset.page];
   if(btn.dataset.page==="heatmaps")void loadHeatmap();
+  if(btn.dataset.page==="interests")void loadScrollDepth();
 }));
 function renderCounts(target,entries){
   const el=$(target);el.replaceChildren();
@@ -236,3 +237,51 @@ function renderHeat(){
   $("heat-status").textContent=records.length+" clique(s) nesta visualização. Cores mais quentes indicam regiões com mais interações"+(heatmapData.length===2000?" (amostra limitada aos últimos 2.000 eventos).":".");
 }
 window.addEventListener("resize",()=>{if(previewReady&&document.querySelector('[data-view="heatmaps"]')?.hidden===false){sizeHeatPreview();renderHeat();}});
+
+let scrollInitialized=false;
+async function loadScrollDepth(){
+  if(!scrollInitialized){
+    scrollInitialized=true;
+    $("scroll-page").addEventListener("change",renderScrollDepth);
+    $("scroll-device").addEventListener("change",renderScrollDepth);
+    $("scroll-refresh").addEventListener("click",fetchScrollDepth);
+  }
+  if(!window.scrollRecords)await fetchScrollDepth();
+  else renderScrollDepth();
+}
+async function fetchScrollDepth(){
+  $("scroll-status").textContent="Carregando profundidade de rolagem…";
+  const after=new Date(Date.now()-30*86400000).toISOString();
+  const {data,error}=await supabase.from("analytics_scroll_depth")
+    .select("session_id,page,device,depth_percent,created_at")
+    .gte("created_at",after).order("created_at",{ascending:false}).limit(2000);
+  if(error){
+    $("scroll-status").textContent="Ainda não foi possível carregar dados de rolagem. Verifique a tabela analytics_scroll_depth.";
+    return;
+  }
+  window.scrollRecords=data||[];
+  renderScrollDepth();
+}
+function renderScrollDepth(){
+  const page=$("scroll-page").value,device=$("scroll-device").value;
+  const rows=(window.scrollRecords||[]).filter(x=>x.page===page&&(device==="todos"||x.device===device));
+  const container=$("scroll-bars");
+  container.replaceChildren();
+  const counts=[25,50,75,100].map(mark=>({
+    mark, count:new Set(rows.filter(x=>Number(x.depth_percent)===mark).map(x=>x.session_id)).size
+  }));
+  const maximum=Math.max(1,...counts.map(x=>x.count));
+  for(const {mark,count} of counts){
+    const item=document.createElement("div");item.className="scroll-bar-item";
+    const head=document.createElement("div");head.className="scroll-bar-head";
+    const left=document.createElement("strong");left.textContent=mark+"% da página";
+    const right=document.createElement("span");right.textContent=fmt(count)+" sessão(ões)";
+    head.append(left,right);
+    const track=document.createElement("div");track.className="scroll-bar-track";
+    const fill=document.createElement("div");fill.className="scroll-bar-fill";
+    fill.style.width=(count/maximum*100)+"%";track.append(fill);item.append(head,track);container.append(item);
+  }
+  $("scroll-status").textContent=rows.length
+    ?"Marcos de rolagem dos últimos 30 dias"+((window.scrollRecords||[]).length===2000?" (amostra de até 2.000 eventos).":".")
+    :"Ainda não há eventos de rolagem para os filtros selecionados.";
+}
