@@ -30,7 +30,7 @@ else {
   else if(!access){ gate("Esta conta não possui autorização para acessar o painel. Entre com a conta oficial da RoCoffee.",{switchAccount:true,email:user.email||""}); }
   else {
     $("gate").hidden=true;$("app").hidden=false;
-    await loadDashboard();
+    await Promise.all([loadDashboard(),loadVisits()]);
   }
 }
 $("logout").addEventListener("click",async()=>{await supabase.auth.signOut();location.replace("../login.html?next=admin%2F")});
@@ -62,4 +62,21 @@ async function loadDashboard(){
   const counts=(key)=>Object.entries(rows.reduce((a,x)=>{const k=x[key]||"Não informado";a[k]=(a[k]||0)+1;return a;},{})).sort((a,b)=>b[1]-a[1]);
   renderCounts("plans",counts("plan"));renderCounts("statuses",counts("status"));
   $("status").textContent="Dados de assinaturas carregados. Demais módulos aguardam instrumentação.";
+}
+
+async function loadVisits(){
+  const after=new Date(Date.now()-30*24*60*60*1000).toISOString();
+  const {data,error}=await supabase.from("analytics_visits").select("session_id,page,source,medium,device,created_at").gte("created_at",after).order("created_at",{ascending:false}).limit(2000);
+  if(error){$("visits-note").textContent="Não foi possível carregar visitas. Verifique a configuração da tabela analytics_visits.";return;}
+  const rows=data??[];
+  $("views-count").textContent=fmt(rows.length);
+  $("sessions-count").textContent=fmt(new Set(rows.map(x=>x.session_id)).size);
+  $("pages-count").textContent=fmt(new Set(rows.map(x=>x.page)).size);
+  const count=(fn)=>Object.entries(rows.reduce((obj,row)=>{const key=fn(row)||"Não informado";obj[key]=(obj[key]||0)+1;return obj;},{})).sort((a,b)=>b[1]-a[1]);
+  renderCounts("visit-sources",count(x=>x.source));
+  renderCounts("visit-devices",count(x=>x.device));
+  renderCounts("visit-pages",count(x=>x.page));
+  const hours=count(x=>new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Porto_Velho",hour:"2-digit",hourCycle:"h23"}).format(new Date(x.created_at))+"h").sort((a,b)=>Number(a[0].slice(0,2))-Number(b[0].slice(0,2)));
+  renderCounts("visit-hours",hours);
+  $("visits-note").textContent="Últimos 30 dias · apenas visitas com consentimento · "+(rows.length===2000?"limite de 2.000 eventos nesta versão; números podem estar incompletos.":"sem idade e gênero.");
 }
