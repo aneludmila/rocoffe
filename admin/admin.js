@@ -191,7 +191,6 @@ function renderHeat(){
   const page=currentHeatPage(),device=$("heat-device").value;
   const records=heatmapData.filter(r=>(r.page===page||(page==="/index.html"&&r.page==="/"))&&r.device===device);
   const width=previewWidth||currentHeatWidth(),height=previewHeight||3300;
-  if(previewReady)sizeHeatPreview();
   const ctx=heatCanvas.getContext("2d",{willReadFrequently:true});
   if(!ctx)return;
   // Half resolution improves performance on long pages while preserving visually smooth heat.
