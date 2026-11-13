@@ -24,7 +24,15 @@ h3{font:600 22px Lora,serif;margin:0 0 18px}.muted{color:var(--muted)}.row{displ
 .error{color:#a23d34} .empty{padding:34px 12px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}
 @media(max-width:950px){.grid{grid-template-columns:repeat(2,1fr)}.columns{grid-template-columns:1fr}}
 @media(max-width:680px){.shell{display:block}aside{padding:16px 18px}aside h1{font-size:23px}nav{margin-top:15px;display:flex;overflow:auto}nav button{white-space:nowrap}main{padding:23px 16px}.grid{grid-template-columns:1fr 1fr}.card{padding:15px}.top{align-items:start}.top button{font-size:12px}}
-.heat-controls{display:flex;flex-wrap:wrap;align-items:end;gap:15px;margin:18px 0}.heat-controls label{display:grid;gap:5px;font-weight:600}.heat-controls select{min-height:40px;border:1px solid var(--line);padding:8px;background:white;border-radius:6px}#heat-frame-wrap{width:100%;overflow:hidden;background:#e9dfd1;border:1px solid var(--line);border-radius:9px}#heat-stage{position:relative;transform-origin:top left}#heat-frame{position:absolute;left:0;top:0;border:0;background:white;pointer-events:none}#heat-layer{position:absolute;inset:0;pointer-events:none}.heat-dot{position:absolute;width:68px;height:68px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(224,23,35,.86) 0%,rgba(244,99,22,.52) 35%,rgba(247,202,35,.24) 65%,transparent 75%);mix-blend-mode:multiply;pointer-events:none}</style>
+.heat-controls{display:flex;flex-wrap:wrap;align-items:end;gap:15px;margin:18px 0}
+.heat-controls label{display:grid;gap:5px;font-weight:600}.heat-controls select{min-height:40px;border:1px solid var(--line);padding:8px;background:white;border-radius:6px}
+#heat-frame-wrap{width:100%;overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:9px}
+#heat-stage{position:relative;transform-origin:top left;background:white}
+#heat-frame{position:absolute;left:0;top:0;display:block;border:0;background:white;pointer-events:none;overflow:hidden}
+#heat-canvas{position:absolute;left:0;top:0;pointer-events:none}
+.heat-legend{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:13px 0;color:var(--muted)}
+.heat-spectrum{display:inline-block;height:13px;width:200px;max-width:45%;border-radius:7px;background:linear-gradient(90deg,#315aff,#40b8ed,#69cb82,#f8e33c,#f99120,#f52126)}
+</style>
 </head>
 <body>
 <div id="gate"><div class="panel"><h1 style="font:600 32px Lora,serif">RoCoffee Admin</h1><p id="gate-message" role="status">Verificando suas permissões…</p><p id="account-email" class="muted" hidden></p><p class="muted">Esta área é exclusiva para administradores autorizados.</p><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><a id="login-link" class="secondary" href="../login.html?next=admin%2F" hidden>Entrar como administrador</a><button id="switch-account" class="secondary" type="button" hidden>Trocar de conta</button><a href="../index.html">Voltar à loja</a></div><p id="switch-error" role="alert" class="error" hidden></p></div></div>
@@ -60,11 +68,13 @@ h3{font:600 22px Lora,serif;margin:0 0 18px}.muted{color:var(--muted)}.row{displ
 <div class="heat-controls">
 <label for="heat-page">Página <select id="heat-page"><option value="/index.html">Página inicial</option><option value="/assinatura.html">Assinaturas</option></select></label>
 <label for="heat-device">Visualização <select id="heat-device"><option value="computador">Computador</option><option value="celular">Celular</option><option value="tablet">Tablet</option></select></label>
+<label for="heat-period">Período <select id="heat-period"><option value="7">7 dias</option><option value="30" selected>30 dias</option></select></label>
 <button id="heat-refresh" class="secondary" type="button">Atualizar</button>
 </div>
 <p id="heat-status" role="status" class="muted">Selecione uma página para visualizar os cliques.</p>
-<div id="heat-frame-wrap"><div id="heat-stage"><iframe id="heat-frame" title="Prévia estática da página" sandbox="allow-same-origin" loading="lazy"></iframe><div id="heat-layer" aria-hidden="true"></div></div></div>
-<p class="muted"><small>A prévia não executa scripts. Posições são aproximadas, agrupadas em faixas de 5% da largura e 50 pixels da altura. Nenhum clique de formulário é registrado.</small></p>
+<div class="heat-legend"><span>Menos cliques</span><span class="heat-spectrum" aria-hidden="true"></span><span>Mais cliques</span></div>
+<div id="heat-frame-wrap"><div id="heat-stage"><iframe id="heat-frame" title="Prévia estática da página RoCoffee" sandbox="allow-same-origin" loading="eager" scrolling="no"></iframe><canvas id="heat-canvas" aria-hidden="true"></canvas></div></div>
+<p class="muted"><small>A prévia exibe o HTML/CSS real da página sem executar seus scripts. Os cliques são aproximados e agregados; pontos antigos podem ter pequenas diferenças de posição. Nenhum clique de formulário é registrado.</small></p>
 </div></section>
 <section data-view="recordings" hidden><div class="panel"><h3>Gravações de sessões</h3><p class="muted">Para reproduzir sessões dentro da RoCoffee será necessária uma integração de replay dedicada, com mascaramento de campos sensíveis, consentimento, controle de acesso e retenção limitada.</p><div class="empty">Gravações ainda não habilitadas.</div></div></section>
 <section data-view="conversions" hidden><div class="panel"><h3>Funil de conversão</h3><p class="muted">Etapas planejadas: visita, produto, carrinho, checkout e pagamento aprovado. Sem eventos coletados, não exibimos porcentagens fictícias.</p><div class="empty">Aguardando instrumentação do funil.</div></div></section>

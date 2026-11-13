@@ -65,10 +65,12 @@ document.addEventListener("click",async(event)=>{
   const width=document.documentElement.clientWidth;
   if(width<280||width>4000)return;
   const x=Math.max(0,Math.min(100,Math.round((event.clientX/width)*20)*5));
+  const fullHeight=Math.max(document.documentElement.scrollHeight,document.body.scrollHeight,1);
   const y=Math.max(0,Math.min(20000,Math.round((event.pageY/50))*50));
+  const yRatio=Math.max(0,Math.min(1,event.pageY/fullHeight));
   try{
     const {error}=await supabase.from("analytics_clicks").insert({
-      page,device:getDevice(),viewport_width:width,x_percent:x,y_bucket:y
+      page,device:getDevice(),viewport_width:width,x_percent:x,y_bucket:y,y_ratio:yRatio
     });
     if(error)console.warn("RoCoffee: mapa de calor temporariamente indisponível.");
   }catch{console.warn("RoCoffee: não foi possível registrar o clique.");}
