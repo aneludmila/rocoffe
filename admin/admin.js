@@ -2,13 +2,32 @@ import { supabase } from "../supabase-client.js";
 const $ = (id) => document.getElementById(id);
 const fmt = (n) => new Intl.NumberFormat("pt-BR").format(n);
 const money = (n) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(n);
-const gate = (message, login=false) => { $("gate-message").textContent=message; $("login-link").hidden=!login; };
+const gate = (message, {login=false, switchAccount=false, email=""}={}) => {
+  $("gate-message").textContent=message;
+  $("login-link").hidden=!login;
+  $("switch-account").hidden=!switchAccount;
+  $("account-email").hidden=!email;
+  $("account-email").textContent=email ? `Conta conectada: ${email}` : "";
+};
+$("switch-account").addEventListener("click",async()=>{
+  const button=$("switch-account");
+  button.disabled=true;
+  $("switch-error").hidden=true;
+  const {error}=await supabase.auth.signOut();
+  if(error){
+    $("switch-error").textContent="Não foi possível sair desta conta. Tente novamente.";
+    $("switch-error").hidden=false;
+    button.disabled=false;
+    return;
+  }
+  location.replace("../login.html?next=admin%2F");
+});
 const {data:{user},error:authError} = await supabase.auth.getUser();
-if(authError || !user){gate("Entre com sua conta para continuar.",true);}
+if(authError || !user){gate("Entre com sua conta administrativa para continuar.",{login:true});}
 else {
   const {data:access,error:accessError}=await supabase.from("admin_users").select("user_id").eq("user_id",user.id).maybeSingle();
-  if(accessError){ gate("Não foi possível verificar o acesso administrativo. Confira a configuração de permissões."); }
-  else if(!access){ gate("Sua conta não possui autorização para acessar o painel."); }
+  if(accessError){ gate("Não foi possível verificar o acesso administrativo. Confira a conexão e as permissões no Supabase.",{switchAccount:true,email:user.email||""}); }
+  else if(!access){ gate("Esta conta não possui autorização para acessar o painel. Entre com a conta oficial da RoCoffee.",{switchAccount:true,email:user.email||""}); }
   else {
     $("gate").hidden=true;$("app").hidden=false;
     await loadDashboard();
