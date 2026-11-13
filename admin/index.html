@@ -27,7 +27,7 @@ h3{font:600 22px Lora,serif;margin:0 0 18px}.muted{color:var(--muted)}.row{displ
 </style>
 </head>
 <body>
-<div id="gate"><div class="panel"><h1 style="font:600 32px Lora,serif">RoCoffee Admin</h1><p id="gate-message">Verificando suas permissões…</p><p class="muted">Esta área é exclusiva para administradores autorizados.</p><a id="login-link" href="../login.html?next=admin%2F" hidden>Entrar na minha conta</a> <a href="../index.html">Voltar à loja</a></div></div>
+<div id="gate"><div class="panel"><h1 style="font:600 32px Lora,serif">RoCoffee Admin</h1><p id="gate-message" role="status">Verificando suas permissões…</p><p id="account-email" class="muted" hidden></p><p class="muted">Esta área é exclusiva para administradores autorizados.</p><div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><a id="login-link" class="secondary" href="../login.html?next=admin%2F" hidden>Entrar como administrador</a><button id="switch-account" class="secondary" type="button" hidden>Trocar de conta</button><a href="../index.html">Voltar à loja</a></div><p id="switch-error" role="alert" class="error" hidden></p></div></div>
 <div id="app" class="shell" hidden>
 <aside><h1>RoCoffee</h1><small>INTELIGÊNCIA & GESTÃO</small><nav aria-label="Menu administrativo">
 <button data-page="overview" class="active">Visão geral</button>
