@@ -55,13 +55,15 @@ Deno.serve(async (req: Request) => {
   const preference = await preferenceResponse.json();
   if (!preferenceResponse.ok) return new Response(JSON.stringify({ error: "Não foi possível iniciar o pagamento", details: preference.message }), { status: 502, headers: cors });
 
-  await supabase.from("subscriptions").update({
+  const privileged = createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const {error:saveError}=await privileged.from("subscriptions").update({
     price_cents: price * 100,
     payment_provider: "mercado_pago",
     preference_id: preference.id,
     status: "pending_payment",
     updated_at: new Date().toISOString(),
-  }).eq("id", subscription.id);
+  }).eq("id", subscription.id).eq("user_id",user.id);
+  if(saveError)return new Response(JSON.stringify({error:"Falha ao preparar a assinatura"}),{status:502,headers:cors});
 
   return new Response(JSON.stringify({ checkout_url: preference.sandbox_init_point || preference.init_point }), { headers: cors });
 });

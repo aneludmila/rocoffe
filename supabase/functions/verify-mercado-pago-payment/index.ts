@@ -27,6 +27,8 @@ Deno.serve(async (req: Request) => {
   if (!subscription) return new Response(JSON.stringify({ error: "Pagamento não pertence a esta conta" }), { status: 403, headers: cors });
 
   const status = payment.status === "approved" ? "active" : payment.status === "rejected" ? "payment_failed" : "pending_payment";
-  await supabase.from("subscriptions").update({ payment_id: String(payment.id), status, paid_at: payment.status === "approved" ? new Date().toISOString() : null, updated_at: new Date().toISOString() }).eq("id", subscription.id);
+  const privileged = createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const {error:saveError}=await privileged.from("subscriptions").update({ payment_id: String(payment.id), status, paid_at: payment.status === "approved" ? new Date().toISOString() : null, updated_at: new Date().toISOString() }).eq("id", subscription.id);
+  if(saveError)return new Response(JSON.stringify({error:"Falha ao atualizar pagamento"}),{status:502,headers:cors});
   return new Response(JSON.stringify({ status }), { headers: cors });
 });
