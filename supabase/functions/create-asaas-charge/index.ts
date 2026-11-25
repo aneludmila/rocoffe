@@ -34,6 +34,8 @@ Deno.serve(async(req:Request)=>{
  const {data:addresses}=await sb.from("addresses").select("cep").eq("user_id",user.id);
  if(!(addresses||[]).some((a:any)=>cep(a.cep)===quote.destination_cep))
   return reply(req,{error:"O CEP da cotação não corresponde a um endereço salvo."},409);
+ // Prevent a client-edited price or status from being mistaken for an authorization.
+ // Subscription status is never trusted as proof of payment: the webhook is authoritative.
  const price=plans[sub.plan]+Number(quote.shipping_cents);
  if(!Number.isSafeInteger(price)||price<500)return reply(req,{error:"Valor do pedido inválido"},400);
  const headers={"access_token":key,"Content-Type":"application/json","Accept":"application/json","User-Agent":"RoCoffee (rocoffe01@gmail.com)"};
