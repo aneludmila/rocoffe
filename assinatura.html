@@ -779,8 +779,7 @@
             plan,
             frequency: $("#frequencia").value,
             grind: $("#moagem").value,
-            price_cents: plan.startsWith("Experiência") ? 27900 : 14900,
-            status: "pending_payment",
+            // Valor e status são definidos exclusivamente pelo servidor.
           })
           .select("id")
           .single();
