@@ -304,6 +304,19 @@
         document.querySelectorAll(".pay-pending").forEach((button) => {
           button.onclick = async () => {
             button.disabled = true;
+            const subscription=(s||[]).find(x=>x.id===button.dataset.id);
+            if(subscription?.payment_provider==="asaas"){
+              const {data:charge,error:chargeError}=await supabase.from("asaas_charges")
+                .select("invoice_url").eq("subscription_id",subscription.id).maybeSingle();
+              if(!chargeError&&charge?.invoice_url){
+                location.href=charge.invoice_url;
+                return;
+              }
+              button.disabled=false;
+              alert("Sua cobrança Asaas ainda não foi iniciada. Volte à escolha da experiência para calcular o frete.");
+              location.href="assinatura.html?retomar=1#endereco";
+              return;
+            }
             const { data, error } = await supabase.functions.invoke(
               "create-mercado-pago-preference",
               { body: { subscription_id: button.dataset.id } },

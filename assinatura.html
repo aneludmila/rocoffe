@@ -397,7 +397,12 @@
         }
       }
     </style>
-  <link rel="stylesheet" href="typography.css"><script id="rocoffee-ios-mp4">document.addEventListener("DOMContentLoaded",()=>{if(!document.documentElement.classList.contains("rocoffee-ios"))return;const loader=document.querySelector("#brewing-loader .brewing-content");const video=document.querySelector("#brewing-loader .brewing-video");const fallback=document.querySelector("#brewing-loader .rocoffee-loader-fallback");if(video)video.style.setProperty("display","none","important");if(fallback)fallback.style.setProperty("display","none","important");if(!loader)return;let img=loader.querySelector(".rocoffee-ios-gif");if(!img){img=document.createElement("img");img.className="rocoffee-ios-gif";img.src="rocoffee-animacao-iphone-fixed.gif";img.alt="Café sendo servido em uma xícara";img.decoding="async";const p=loader.querySelector("[data-loading-message]");loader.insertBefore(img,p||null);}img.style.setProperty("display","block","important");});</script></head>
+  <link rel="stylesheet" href="typography.css"><script id="rocoffee-ios-mp4">document.addEventListener("DOMContentLoaded",()=>{if(!document.documentElement.classList.contains("rocoffee-ios"))return;const loader=document.querySelector("#brewing-loader .brewing-content");const video=document.querySelector("#brewing-loader .brewing-video");const fallback=document.querySelector("#brewing-loader .rocoffee-loader-fallback");if(video)video.style.setProperty("display","none","important");if(fallback)fallback.style.setProperty("display","none","important");if(!loader)return;let img=loader.querySelector(".rocoffee-ios-gif");if(!img){img=document.createElement("img");img.className="rocoffee-ios-gif";img.src="rocoffee-animacao-iphone-fixed.gif";img.alt="Café sendo servido em uma xícara";img.decoding="async";const p=loader.querySelector("[data-loading-message]");loader.insertBefore(img,p||null);}img.style.setProperty("display","block","important");});</script><style id="rocoffee-shipping-css">
+.shipping-quote-box{border:1px solid rgba(47,33,25,.2);padding:24px;margin:24px 0;background:#fffaf3;border-radius:9px}
+.shipping-quote-box h2{font-family:Lora,serif;font-size:1.4rem;margin:0 0 8px}.shipping-quote-box p{color:#66594f;font-size:.9rem}
+#quote-options{display:grid;gap:10px;margin-top:12px}.quote-choice{display:flex;gap:10px;align-items:center;border:1px solid #d6c2a5;padding:12px;border-radius:6px;font-size:.86rem;background:white}
+.quote-choice input{accent-color:#253015}.quote-choice:has(input:checked){border-color:#253015}
+</style></head>
   <body>
     <div class="top">Monte sua experiência amazônica</div>
     <nav class="nav wrap">
@@ -524,6 +529,11 @@
               <label>Estado</label><input id="state" maxlength="2" />
             </div>
           </div>
+          <div class="shipping-quote-box"><h2>Calcule seu frete</h2>
+<p>Consulte transportadoras e prazos para o CEP informado. A cotação depende da configuração das embalagens.</p>
+<button class="btn secondary" type="button" id="quote-shipping">Calcular frete</button>
+<p id="quote-message" role="status" aria-live="polite"></p><div id="quote-options" role="radiogroup" aria-label="Opções de entrega"></div>
+</div>
           <div class="actions">
             <button class="btn secondary back" data-back="2">Voltar</button
             ><button class="btn" id="save-address">Salvar e continuar →</button>
@@ -532,9 +542,9 @@
         <div class="step" data-step-panel="4">
           <div class="eyebrow">Etapa 4 de 4</div>
           <h1>Sua descoberta está quase pronta.</h1>
-          <p>Revise os dados e siga para o ambiente seguro do Mercado Pago.</p>
+          <p id="payment-intro">Revise os dados e siga para o ambiente seguro do Mercado Pago.</p>
           <div class="success">
-            <strong>Pagamento protegido pelo Mercado Pago</strong>
+            <strong id="payment-title">Pagamento protegido pelo Mercado Pago</strong>
             <p>
               Escolha Pix ou cartão no checkout. A RoCoffee não recebe nem
               armazena os dados do seu cartão.
@@ -558,14 +568,13 @@
         <div class="row">
           <span>Formato</span><strong id="sum-grind">Em grãos</strong>
         </div>
-        <div class="row">
-          <span>Entrega</span><strong id="sum-city">A definir</strong>
-        </div>
+        <div class="row"><span>Entrega</span><strong id="sum-city">A definir</strong></div>
+        <div class="row"><span>Frete (cotação)</span><strong id="sum-shipping">Não calculado</strong></div>
         <div class="total">
           <small>Valor por edição</small><strong id="sum-price">R$ 149</strong>
         </div>
         <p class="note">
-          Primeira edição. O pagamento será concluído no Mercado Pago.
+          <span id="payment-note">Primeira edição. O pagamento será concluído no Mercado Pago. A cotação de frete é informativa enquanto a migração estiver em testes.</span>
         </p>
       </aside>
     </main>
@@ -629,6 +638,9 @@
         showBrewing,
         hideBrewing,
       } from "./supabase-client.js";
+      import { PAYMENT_PROVIDER } from "./checkout-config.js";
+      const usingAsaas = PAYMENT_PROVIDER === "asaas";
+      let selectedQuote = null;
       let user = await currentUser();
       const $ = (s) => document.querySelector(s);
       const params = new URLSearchParams(location.search);
@@ -646,6 +658,8 @@
       }
       if (requested === "essencial") $("#essencial").checked = true;
       if (requested === "experiencia") $("#experiencia").checked = true;
+      const money = (cents) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(cents/100);
+      function resetQuote(){selectedQuote=null;$("#quote-options").replaceChildren();$("#sum-shipping").textContent="Não calculado";$("#quote-message").textContent="";}
       function checkoutState() {
         return {
           plan: $('[name="plano"]:checked').value,
@@ -711,9 +725,50 @@
       document
         .querySelectorAll(".back")
         .forEach((b) => (b.onclick = () => step(+b.dataset.back)));
-      document
-        .querySelectorAll('[name="plano"],select')
-        .forEach((x) => (x.onchange = update));
+      document.querySelectorAll('[name="plano"],#frequencia,#moagem').forEach((x)=>(x.onchange=()=>{
+        if(x.name==="plano")resetQuote();
+        update();
+      }));
+      $("#cep").addEventListener("input",resetQuote);
+      $("#payment-title").textContent=usingAsaas?"Pagamento protegido pelo Asaas":"Pagamento protegido pelo Mercado Pago";
+      $("#payment-intro").textContent=usingAsaas?"Revise os dados e prossiga para o ambiente seguro do Asaas.":"Revise os dados e prossiga para o ambiente seguro do Mercado Pago.";
+      $("#payment-note").textContent=usingAsaas?"O valor do pagamento inclui a edição e o frete escolhido.":"A cotação de frete é apenas informativa enquanto a migração para Asaas estiver em testes.";
+      $("#quote-shipping").onclick = async () => {
+        const cep=$("#cep").value.replace(/\\D/g,"");
+        if(cep.length!==8){$("#quote-message").textContent="Informe um CEP válido com 8 dígitos.";return;}
+        if(!user){saveCheckout();location.href=loginUrl();return;}
+        const button=$("#quote-shipping");
+        button.disabled=true;
+        resetQuote();
+        $("#quote-message").textContent="Consultando transportadoras…";
+        try{
+          const {data,error}=await supabase.functions.invoke("quote-melhor-envio",{
+            body:{cep,plan:$('[name="plano"]:checked').value}
+          });
+          if(error||!Array.isArray(data?.options)){
+            $("#quote-message").textContent=data?.error||"Não foi possível calcular o frete. Verifique mais tarde.";
+            return;
+          }
+          if(!data.options.length){$("#quote-message").textContent=data.message||"Sem transportadoras disponíveis para este CEP.";return;}
+          $("#quote-message").textContent=usingAsaas?"Selecione uma opção de entrega:":"Valores estimados. Ainda não incluídos no pagamento atual.";
+          data.options.forEach((option)=>{
+            const label=document.createElement("label");
+            label.className="quote-choice";
+            const input=document.createElement("input");
+            input.type="radio";input.name="quote";input.value=option.id;
+            input.disabled=!usingAsaas;
+            const text=document.createElement("span");
+            text.textContent=option.carrier_name+" — "+option.service_name+" • "+money(option.shipping_cents)+(option.delivery_days!=null?" • "+option.delivery_days+" dias úteis":"");
+            label.append(input,text);
+            $("#quote-options").append(label);
+            input.addEventListener("change",()=>{
+              selectedQuote=option;
+              $("#sum-shipping").textContent=money(option.shipping_cents);
+            });
+          });
+        }catch(e){$("#quote-message").textContent="Erro de conexão. Tente novamente.";}
+        finally{button.disabled=false;}
+      };
       update();
       if (
         user &&
@@ -768,6 +823,10 @@
         step(4);
       };
       $("#finish").onclick = async () => {
+        if(usingAsaas&&!selectedQuote){
+          alert("Selecione um frete válido antes de continuar.");
+          return;
+        }
         const button = $("#finish");
         button.disabled = true;
         showBrewing("Abrindo seu pagamento seguro...");
@@ -790,15 +849,15 @@
           return alert("Não foi possível preparar sua assinatura.");
         }
         const { data, error: paymentError } = await supabase.functions.invoke(
-          "create-mercado-pago-preference",
-          { body: { subscription_id: subscription.id } },
+          usingAsaas ? "create-asaas-charge" : "create-mercado-pago-preference",
+          { body: { subscription_id: subscription.id, ...(usingAsaas?{quote_id:selectedQuote.id}:{}) } },
         );
         hideBrewing();
         if (paymentError || !data?.checkout_url) {
           button.disabled = false;
           alert(
             data?.error ||
-              "O Mercado Pago ainda está em configuração. Sua assinatura ficou salva na sua conta.",
+              "O pagamento ainda não está disponível. Sua assinatura ficou salva na sua conta.",
           );
           return (location.href = "minha-conta.html");
         }
