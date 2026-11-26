@@ -3,9 +3,9 @@ import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 const reply=(payload:unknown,status=200)=>new Response(JSON.stringify(payload),{status,headers:{"Content-Type":"application/json"}});
 Deno.serve(async(req:Request)=>{
  if(req.method!=="POST")return reply({error:"Método não permitido"},405);
- const expected=Deno.env.get("ASAAS_WEBHOOK_TOKEN");
+ const expected=Deno.env.get("ASAAS_WEBHOOK_TOKEN")?.trim();
  if(!expected||expected.length<32)return reply({error:"Webhook não configurado"},503);
- const supplied=req.headers.get("asaas-access-token")||"";
+ const supplied=(req.headers.get("asaas-access-token")||"").trim();
  if(supplied!==expected){
    // Log metadata only; NEVER log tokens, JWTs, hashes, or payment payload.
    console.warn("Asaas webhook authentication failed",{
