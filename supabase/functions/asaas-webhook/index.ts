@@ -6,7 +6,16 @@ Deno.serve(async(req:Request)=>{
  const expected=Deno.env.get("ASAAS_WEBHOOK_TOKEN");
  if(!expected||expected.length<32)return reply({error:"Webhook não configurado"},503);
  const supplied=req.headers.get("asaas-access-token")||"";
- if(supplied!==expected)return reply({error:"Token inválido"},401);
+ if(supplied!==expected){
+   // Log metadata only; NEVER log tokens, JWTs, hashes, or payment payload.
+   console.warn("Asaas webhook authentication failed",{
+     tokenHeaderPresent:Boolean(supplied),
+     receivedLength:supplied.length,
+     configuredLength:expected.length,
+     lengthsMatch:supplied.length===expected.length
+   });
+   return reply({error:"Token inválido"},401);
+ }
  let event:any;
  try{event=await req.json();}catch{return reply({error:"JSON inválido"},400);}
  const type=String(event?.event||"");
