@@ -532,17 +532,17 @@
         <div class="step" data-step-panel="4">
           <div class="eyebrow">Etapa 4 de 4</div>
           <h1>Sua descoberta está quase pronta.</h1>
-          <p>Revise os dados e siga para o ambiente seguro do Mercado Pago.</p>
+          <p>Revise os dados e siga para o ambiente seguro do Asaas.</p>
           <div class="success">
-            <strong>Pagamento protegido pelo Mercado Pago</strong>
+            <strong>Pagamento protegido pelo Asaas</strong>
             <p>
               Escolha Pix ou cartão no checkout. A RoCoffee não recebe nem
               armazena os dados do seu cartão.
             </p>
           </div>
-          <div class="actions">
+          <div class="field" style="margin:20px 0"><label for="shipping-choice">Transportadora e frete</label><select id="shipping-choice" disabled><option value="">Calcule o frete</option></select><p id="shipping-status" role="status" aria-live="polite"></p><button class="btn secondary" id="refresh-shipping" type="button">Calcular novamente</button></div><div class="actions">
             <button class="btn secondary back" data-back="3">Voltar</button
-            ><button class="btn" id="finish">Ir para o pagamento</button>
+            ><button class="btn" id="finish" disabled>Ir para o pagamento</button>
           </div>
         </div>
       </section>
@@ -562,10 +562,10 @@
           <span>Entrega</span><strong id="sum-city">A definir</strong>
         </div>
         <div class="total">
-          <small>Valor por edição</small><strong id="sum-price">R$ 149</strong>
+          <small>Total da primeira edição (com frete)</small><strong id="sum-price">R$ 149</strong>
         </div>
         <p class="note">
-          Primeira edição. O pagamento será concluído no Mercado Pago.
+          Primeira edição pelo Asaas. Não há cobrança automática das próximas edições.
         </p>
       </aside>
     </main>
@@ -630,6 +630,8 @@
         hideBrewing,
       } from "./supabase-client.js";
       let user = await currentUser();
+let quotes=[], chosen=null, generation=0, busy=false;
+const money=c=>(c/100).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
       const $ = (s) => document.querySelector(s);
       const params = new URLSearchParams(location.search);
       const requested = params.get("plano");
@@ -677,9 +679,7 @@
       function update() {
         const p = $('[name="plano"]:checked').value;
         $("#sum-plan").textContent = p;
-        $("#sum-price").textContent = p.startsWith("Experiência")
-          ? "R$ 279"
-          : "R$ 149";
+        $("#sum-price").textContent = money((p.startsWith("Experiência")?27900:14900)+(chosen?.shipping_cents||0));
         $("#sum-frequency").textContent = $("#frequencia").value;
         $("#sum-grind").textContent = $("#moagem").value;
         saveCheckout();
@@ -713,7 +713,30 @@
         .forEach((b) => (b.onclick = () => step(+b.dataset.back)));
       document
         .querySelectorAll('[name="plano"],select')
-        .forEach((x) => (x.onchange = update));
+        .forEach(x=>{if(x.id!=="shipping-choice")x.onchange=()=>{resetQuotes();update();};});
+      function resetQuotes(){
+        generation++;quotes=[];chosen=null;
+        $("#shipping-choice").replaceChildren(new Option("Selecione o frete",""));
+        $("#shipping-choice").disabled=true;$("#finish").disabled=true;
+      }
+      async function message(error,fallback){try{return (await error?.context?.json())?.error||fallback;}catch{return fallback;}}
+      async function calculateShipping(){
+        resetQuotes();update();const run=generation;
+        $("#shipping-status").textContent="Consultando transportadoras...";
+        $("#refresh-shipping").disabled=true;
+        try{
+          const {data,error}=await supabase.functions.invoke("quote-melhor-envio",{body:{plan:checkoutState().plan,cep:$("#cep").value}});
+          if(run!==generation)return;
+          if(error)throw new Error(await message(error,"Não foi possível calcular o frete."));
+          quotes=(data?.options||[]).filter(q=>q.id&&Number.isSafeInteger(q.shipping_cents)&&q.shipping_cents>=0&&Date.parse(q.expires_at)>Date.now());
+          for(const q of quotes)$("#shipping-choice").add(new Option(q.carrier_name+" — "+q.service_name+" • "+money(q.shipping_cents)+(q.delivery_days==null?"":" • "+q.delivery_days+" dias úteis"),q.id));
+          $("#shipping-choice").disabled=!quotes.length;
+          $("#shipping-status").textContent=quotes.length?"Escolha a entrega.":data?.message||"Nenhuma opção disponível.";
+        }catch(e){if(run===generation)$("#shipping-status").textContent=e.message;}finally{$("#refresh-shipping").disabled=false;}
+      }
+      $("#shipping-choice").onchange=()=>{chosen=quotes.find(q=>q.id===$("#shipping-choice").value)||null;$("#finish").disabled=!chosen||busy;update();};
+      $("#refresh-shipping").onclick=calculateShipping;
+      $("#cep").addEventListener("input",()=>{resetQuotes();update();});
       update();
       if (
         user &&
@@ -765,43 +788,26 @@
         });
         hideBrewing();
         if (error) return alert("Não foi possível salvar o endereço.");
-        step(4);
+        $("#sum-city").textContent=$("#city").value+"/"+$("#state").value;
+        step(4);await calculateShipping();
       };
-      $("#finish").onclick = async () => {
-        const button = $("#finish");
-        button.disabled = true;
-        showBrewing("Abrindo seu pagamento seguro...");
-        const plan = $('[name="plano"]:checked').value;
-        const { data: subscription, error } = await supabase
-          .from("subscriptions")
-          .insert({
-            user_id: user.id,
-            plan,
-            frequency: $("#frequencia").value,
-            grind: $("#moagem").value,
-            // Valor e status são definidos exclusivamente pelo servidor.
-          })
-          .select("id")
-          .single();
-        if (error) {
-          hideBrewing();
-          button.disabled = false;
-          return alert("Não foi possível preparar sua assinatura.");
-        }
-        const { data, error: paymentError } = await supabase.functions.invoke(
-          "create-mercado-pago-preference",
-          { body: { subscription_id: subscription.id } },
-        );
-        hideBrewing();
-        if (paymentError || !data?.checkout_url) {
-          button.disabled = false;
-          alert(
-            data?.error ||
-              "O Mercado Pago ainda está em configuração. Sua assinatura ficou salva na sua conta.",
-          );
-          return (location.href = "minha-conta.html");
-        }
-        location.href = data.checkout_url;
+      $("#finish").onclick=async()=>{
+        if(busy||!user||!chosen)return;
+        if(Date.parse(chosen.expires_at)<=Date.now()){await calculateShipping();return;}
+        busy=true;$("#finish").disabled=true;showBrewing("Abrindo seu pagamento seguro...");
+        try{
+          const state=checkoutState();
+          const key="rocoffee-payment:"+user.id+":"+chosen.id+":"+state.frequency+":"+state.grind;
+          let id=sessionStorage.getItem(key);
+          if(!id){
+            const {data:sub,error}=await supabase.from("subscriptions").insert({user_id:user.id,...state}).select("id").single();
+            if(error||!sub)throw new Error("Não foi possível preparar sua assinatura.");
+            id=sub.id;sessionStorage.setItem(key,id);
+          }
+          const {data,error}=await supabase.functions.invoke("create-asaas-charge",{body:{subscription_id:id,quote_id:chosen.id}});
+          if(error||!data?.checkout_url)throw new Error(await message(error,"Não foi possível preparar o pagamento. Confira sua conta."));
+          location.href=data.checkout_url;
+        }catch(e){alert(e.message);location.href="minha-conta.html";}finally{hideBrewing();busy=false;$("#finish").disabled=!chosen;}
       };
     </script>
   <script type="module" src="./analytics.js"></script>

@@ -290,7 +290,7 @@
           document.querySelector("#subscriptions").innerHTML = s
             .map(
               (x) =>
-                `<div class="item"><strong>${x.plan}</strong><small>${x.frequency} • ${x.grind} • ${x.status === "active" ? "Pagamento aprovado" : x.status === "payment_failed" ? "Pagamento não aprovado" : "Aguardando pagamento"}</small>${x.status !== "active" ? `<button class="btn pay-pending" data-id="${x.id}">Pagar agora</button>` : ""}</div>`,
+                `<div class="item"><strong>${x.plan}</strong><small>${x.frequency} • ${x.grind} • ${x.status === "active" ? "Pagamento aprovado" : x.status === "payment_failed" ? "Pagamento não aprovado" : "Aguardando pagamento"}</small>${x.status === "pending_payment" && x.payment_provider === "asaas" ? `<button class="btn pay-pending" data-id="${x.id}">Pagar agora</button>` : ""}</div>`,
             )
             .join("");
         if (a?.length)
@@ -305,13 +305,13 @@
           button.onclick = async () => {
             button.disabled = true;
             const { data, error } = await supabase.functions.invoke(
-              "create-mercado-pago-preference",
-              { body: { subscription_id: button.dataset.id } },
+              "create-asaas-charge",
+              { body: { subscription_id: button.dataset.id, quote_id: "resume" } },
             );
             if (error || !data?.checkout_url) {
               button.disabled = false;
               return alert(
-                data?.error || "O Mercado Pago ainda está em configuração.",
+                data?.error || "Não foi possível recuperar a cobrança. Entre em contato com o suporte.",
               );
             }
             location.href = data.checkout_url;
