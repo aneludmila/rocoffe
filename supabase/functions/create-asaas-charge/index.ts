@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-const origins=new Set(["https://rocoffee.netlify.app","https://rocoffee.com.br","https://www.rocoffee.com.br"]);
+const origins=new Set(["https://rocoffee.netlify.app","https://rocoffee.com.br","https://www.rocoffee.com.br","https://deploy-preview-21--rocoffee.netlify.app"]);
 function cors(req:Request){
  const o=req.headers.get("origin")||"";
  return {"Access-Control-Allow-Origin":origins.has(o)?o:"https://rocoffee.netlify.app",
@@ -16,6 +16,7 @@ Deno.serve(async(req:Request)=>{
  const key=Deno.env.get("ASAAS_API_KEY"),env=Deno.env.get("ASAAS_ENV");
  if(Deno.env.get("ASAAS_ENABLED")!=="true"||!key||!["sandbox","production"].includes(env||""))
   return reply(req,{code:"setup_required",error:"Pagamento Asaas ainda não habilitado."},503);
+ if(req.headers.get("origin")==="https://deploy-preview-21--rocoffee.netlify.app")return reply(req,{code:"preview_payment_disabled",error:"Pagamento desabilitado neste preview enquanto o ambiente de testes não estiver isolado."},403);
  const base=env==="production"?"https://api.asaas.com/v3":"https://api-sandbox.asaas.com/v3";
  const auth=req.headers.get("authorization")||"";
  const sb=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_ANON_KEY")!,{global:{headers:{Authorization:auth}}});
