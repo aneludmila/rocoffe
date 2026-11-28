@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
-const origins=new Set(["https://rocoffee.netlify.app","https://rocoffee.com.br","https://www.rocoffee.com.br"]);
+const origins=new Set(["https://rocoffee.netlify.app","https://rocoffee.com.br","https://www.rocoffee.com.br","https://deploy-preview-21--rocoffee.netlify.app"]);
 function headers(req:Request){
  const origin=req.headers.get("origin")||"";
  return {"Access-Control-Allow-Origin":origins.has(origin)?origin:"https://rocoffee.netlify.app",
